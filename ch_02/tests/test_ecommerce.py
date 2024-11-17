@@ -4,7 +4,6 @@ Python 3 Object-Oriented Programming
 Chapter 2, Objects in Python.
 """
 
-from ecommerce.products import Product
 import ecommerce.products
 import ecommerce.payments.stripe
 
@@ -23,6 +22,8 @@ def test_products_db_3():
 def test_products_db_4():
     db = ecommerce.products.DB("path/to/data")
     q = ecommerce.products.Query(db, "products")
+    assert q.database is db
+    assert q.collection == "products"
 
 def test_products_db_5():
     ecommerce.products.database.initialize_database("production/data")

@@ -1,5 +1,9 @@
-# Python 3 Object-Oriented Programming, 4th ed.
+# Python 3 Object-Oriented Programming, 5th ed.
 
-Chapter 2.  Objects in Python.
+Chapter 2, Objects in Python.
 
-Core data model of samples and training data.
+To run the test suite using **uv**:
+
+```bash
+uvx tox run
+```

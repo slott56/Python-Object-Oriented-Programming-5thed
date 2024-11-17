@@ -5,6 +5,10 @@ Chapter 2, Objects in Python.
 """
 from ..database import Database
 
+class SomeClass:
+    d = Database("file:/path/to/data")
+
+
 test_2 = """
 >>> db = Database("path/to/data")
 >>> db.fetch("test_2")

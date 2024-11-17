@@ -4,15 +4,12 @@ Python 3 Object-Oriented Programming 4th ed.
 Chapter 2, Objects in Python.
 """
 
-from typing import Optional
-
-
 class Formatter:
     def format(self, string: str) -> str:
-        pass
+        return string
 
 
-def format_string(string: str, formatter: Optional[Formatter] = None) -> str:
+def format_string(string: str, formatter: Formatter | None = None) -> str:
     """
     Format a string using the formatter object, which
     is expected to have a format() method that accepts

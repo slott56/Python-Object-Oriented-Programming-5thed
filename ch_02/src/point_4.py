@@ -61,58 +61,51 @@ Help on class Point in module point_4:
 <BLANKLINE>
 class Point(builtins.object)
  |  Point(x: float = 0, y: float = 0) -> None
- |  
+ |
  |  Represents a point in two-dimensional geometric coordinates
- |  
+ |
  |  >>> p_0 = Point()
  |  >>> p_1 = Point(3, 4)
  |  >>> p_0.calculate_distance(p_1)
  |  5.0
- |  
+ |
  |  Methods defined here:
- |  
+ |
  |  __init__(self, x: float = 0, y: float = 0) -> None
  |      Initialize the position of a new point. The x and y
  |      coordinates can be specified. If they are not, the
  |      point defaults to the origin.
- |      
+ |
  |      :param x: float x-coordinate
  |      :param y: float x-coordinate
- |  
+ |
  |  calculate_distance(self, other: 'Point') -> float
  |      Calculate the Euclidean distance from this point
  |      to a second point passed as a parameter.
- |      
+ |
  |      :param other: Point instance
  |      :return: float distance
- |  
+ |
  |  move(self, x: float, y: float) -> None
  |      Move the point to a new location in 2D space.
- |      
+ |
  |      :param x: float x-coordinate
  |      :param y: float x-coordinate
- |  
+ |
  |  reset(self) -> None
  |      Reset the point back to the geometric origin: 0, 0
- |  
+ |
  |  ----------------------------------------------------------------------
  |  Data descriptors defined here:
- |  
+ |
  |  __dict__
- |      dictionary for instance variables (if defined)
- |  
+ |      dictionary for instance variables
+ |
  |  __weakref__
- |      list of weak references to the object (if defined)
+ |      list of weak references to the object
 <BLANKLINE>
 
 """
-
-test_main = """
->>> main()
-p1.calculate_distance(p2)=5.0
-"""
-
-__test__ = {name: case for name, case in globals().items() if name.startswith("test_")}
 
 
 def main() -> None:
@@ -129,3 +122,11 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+test_main = """
+>>> main()
+p1.calculate_distance(p2)=5.0
+"""
+
+__test__ = {name: case for name, case in globals().items() if name.startswith("test_")}

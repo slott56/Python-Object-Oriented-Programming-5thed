@@ -22,6 +22,7 @@ class Point:
         return math.hypot(self.x - other.x, self.y - other.y)
 
 
+
 test_point = """
 >>> point1 = Point()
 >>> point2 = Point()
@@ -40,5 +41,11 @@ test_point = """
 0.0
 """
 
+
+test_init = """
+>>> point = Point(3, 5)
+>>> print(point.x, point.y)
+3 5
+"""
 
 __test__ = {name: case for name, case in globals().items() if name.startswith("test_")}

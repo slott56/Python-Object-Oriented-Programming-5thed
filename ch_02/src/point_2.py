@@ -38,4 +38,16 @@ test_point = """
 """
 
 
+test_partial = """
+>>> point = Point()
+>>> point.x = 5
+>>> print(point.x)
+5
+>>> print(point.y)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'Point' object has no attribute 'y'
+"""
+
+
 __test__ = {name: case for name, case in globals().items() if name.startswith("test_")}

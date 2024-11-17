@@ -1,5 +1,9 @@
-# Python 3 Object-Oriented Programming, 4th ed.
+# Python 3 Object-Oriented Programming, 5th ed.
 
 Chapter 1, Object-Oriented Design.
 
-Creating the 4+1 views of the problem domain.
+To run the test suite using **uv**:
+
+```bash
+uvx tox run
+```

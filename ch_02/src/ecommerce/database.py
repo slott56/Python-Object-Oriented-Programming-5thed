@@ -3,14 +3,13 @@ Python 3 Object-Oriented Programming 4th ed.
 
 Chapter 2, Objects in Python.
 """
-from __future__ import annotations
-from typing import Optional, Any
+from typing import Any
 
 
 class Database:
     """The Database Implementation"""
 
-    def __init__(self, connection: Optional[str] = None) -> None:
+    def __init__(self, connection: str | None = None) -> None:
         """Create a connection to a database."""
         self.connection = connection
 
@@ -18,21 +17,21 @@ class Database:
         return {"key": key}
 
 
-db: Optional[Database] = None
+db: Database | None = None
 
 
-def initialize_database(connection: Optional[str] = None) -> None:
-    global db
-    db = Database(connection)
-    # print(f"initialized {db!r} with {connection!r}")
-
-
-def get_database(connection: Optional[str] = None) -> Database:
+def initialize_database(connection: str | None = None) -> None:
     global db
     if not db:
         db = Database(connection)
-        # print(f"initialized {db!r} with {connection!r}")
+
+
+def get_database(connection: str | None = None) -> Database:
+    global db
+    if not db:
+        db = Database(connection)
     return db
+
 
 
 class Query:
@@ -40,4 +39,13 @@ class Query:
 
     def __init__(self, database: Database, collection: str) -> None:
         """Create a query for a database"""
-        pass
+        self.database = database
+        self.collection = collection
+
+test_db = """
+>>> database = Database("file:/path/to/files")
+"""
+
+
+__test__ = {name: case for name, case in globals().items() if
+            name.startswith("test_")}
