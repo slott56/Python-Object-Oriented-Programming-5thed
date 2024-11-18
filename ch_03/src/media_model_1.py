@@ -3,23 +3,22 @@ Python 3 Object-Oriented Programming 4th ed.
 
 Chapter 3, When Objects Are Alike
 """
-from __future__ import annotations
+
 from pathlib import Path
-from typing import Protocol
+import abc
 
 
-class Playable(Protocol):
-    def play(self) -> None:
-        ...
-
-
-class AudioFile(Playable):
+class AudioFile(abc.ABC):
     ext: str
 
     def __init__(self, filepath: Path) -> None:
         if not filepath.suffix == self.ext:
-            raise ValueError("Invalid file format")
+            raise ValueError(f"invalid file format {filepath.suffix!r}")
         self.filepath = filepath
+
+    @abc.abstractmethod
+    def play(self) -> None:
+        ...
 
 
 class MP3File(AudioFile):
@@ -43,7 +42,7 @@ class OggFile(AudioFile):
         print(f"playing {self.filepath} as ogg")
 
 
-class FlacFile(Playable):
+class FlacFile:
     def __init__(self, filepath: Path) -> None:
         if not filepath.suffix == ".flac":
             raise ValueError("Not a .flac file")
@@ -53,7 +52,7 @@ class FlacFile(Playable):
         print(f"playing {self.filepath} as flac")
 
 
-test_audio_1 = """
+test_audio_2 = """
 >>> p_1 = MP3File(Path("Heart of the Sunrise.mp3"))
 >>> p_1.play()
 playing Heart of the Sunrise.mp3 as mp3
@@ -66,8 +65,7 @@ playing Heart of the Sunrise.ogg as ogg
 >>> error = MP3File(Path("The Fish.mov"))
 Traceback (most recent call last):
 ...
-ValueError: Invalid file format
-
+ValueError: invalid file format '.mov'
 """
 
 test_flac = """
@@ -81,6 +79,7 @@ ValueError: Not a .flac file
 
 """
 
+type Playable = AudioFile | FlacFile
 
 class Entertainment:
     def __init__(self, play_list: list[Playable]) -> None:
@@ -97,6 +96,7 @@ def fragile() -> None:
     s3 = OggFile(Path("We Have Heaven.ogg"))
     s4 = FlacFile(Path("South Side of the Sky.flac"))
     side_1 = Entertainment([s1, s2, s3, s4])
+    side_1.play()
 
 
 __test__ = {name: case for name, case in globals().items() if name.startswith("test_")}

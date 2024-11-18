@@ -3,8 +3,7 @@ Python 3 Object-Oriented Programming 4th ed.
 
 Chapter 3, When Objects Are Alike.
 """
-from __future__ import annotations
-from typing import Optional, Protocol, Any
+from typing import Any
 
 ## Extending built-ins
 
@@ -32,17 +31,6 @@ class Contact:
         return f"{self.__class__.__name__}(" f"{self.name!r}, {self.email!r}" f")"
 
 
-test_search = """
->>> Contact.all_contacts = ContactList()
-
->>> c1 = Contact("John A", "johna@example.net")
->>> c2 = Contact("John B", "johnb@sloop.net")
->>> c3 = Contact("Jenna C", "cutty@sark.io")
->>> [c.name for c in Contact.all_contacts.search('John')]
-['John A', 'John B']
-"""
-
-
 ## Multiple inheritance -- working version
 
 
@@ -67,6 +55,17 @@ class Friend(Contact, AddressHolder):
     def __init__(self, /, phone: str = "", **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.phone = phone
+
+
+test_search = """
+>>> Contact.all_contacts = ContactList()
+
+>>> c1 = Contact("John A", "johna@example.net")
+>>> c2 = Contact("John B", "johnb@sloop.net")
+>>> c3 = Contact("Jenna C", "cutty@sark.io")
+>>> [c.name for c in Contact.all_contacts.search('John')]
+['John A', 'John B']
+"""
 
 
 test_friend = """
@@ -106,7 +105,15 @@ Traceback (most recent call last):
   File "src/commerce.py", line 58, in __init__
     super().__init__(**kwargs)  # type: ignore [call-arg]
 TypeError: object.__init__() takes exactly one argument (the instance to initialize)
+"""
 
+test_friend_mro = """
+>>> from pprint import pprint
+>>> pprint(Friend.__mro__)
+(<class 'commerce.Friend'>,
+ <class 'commerce.Contact'>,
+ <class 'commerce.AddressHolder'>,
+ <class 'object'>)
 """
 
 
