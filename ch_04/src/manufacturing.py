@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming Case Study
 
 Chapter 4, Expecting the Unexpected
 """
-from __future__ import annotations
 
 
 def divide_with_exception(dividend: int, divisor: int) -> None:

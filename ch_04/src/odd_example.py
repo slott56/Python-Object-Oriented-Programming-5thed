@@ -3,10 +3,9 @@ Python 3 Object-Oriented Programming Case Study
 
 Chapter 4.
 """
-from typing import List
 
 
-class EvenOnly(List[int]):
+class EvenOnly(list[int]):
     def append(self, value: int) -> None:
         if not isinstance(value, int):
             raise TypeError("Only integers can be added")
@@ -57,6 +56,9 @@ test_never_returns = """
 >>> never_returns()
 Traceback (most recent call last):
 ...
+    never_returns()
+...
+    raise Exception("This is always raised")
 Exception: This is always raised
 
 """
@@ -73,6 +75,11 @@ test_call_exceptor = """
 >>> call_exceptor()
 Traceback (most recent call last):
 ...
+    call_exceptor()
+...
+    never_returns()
+...
+    raise Exception("This is always raised")
 Exception: This is always raised
 
 """
@@ -95,10 +102,8 @@ Executed after the exception
 
 """
 
-from typing import Union
 
-
-def funny_division(divisor: float) -> Union[str, float]:
+def funny_division(divisor: float) -> str | float:
     try:
         return 100 / divisor
     except ZeroDivisionError:
@@ -113,12 +118,17 @@ Zero is not a good idea!
 >>> print(funny_division("hello"))
 Traceback (most recent call last):
 ...
+    print(funny_division("hello"))
+          ^^^^^^^^^^^^^^^^^^^^^^^
+...
+    return 100 / divisor
+           ~~~~^~~~~~~~~
 TypeError: unsupported operand type(s) for /: 'int' and 'str'
 
 """
 
 
-def funnier_division(divisor: int) -> Union[str, float]:
+def funnier_division(divisor: int) -> str | float:
     try:
         if divisor == 13:
             raise ValueError("13 is an unlucky number")
@@ -128,17 +138,27 @@ def funnier_division(divisor: int) -> Union[str, float]:
 
 
 test_funnier_division = """
->>> for val in (0, "hello", 50.0, 13):
+>>> for val in (0, "hello", 50.0):
 ...     print(f"Testing {val!r}:", end=" ")
 ...     print(funnier_division(val))
+... 
+Testing 0: Enter a number other than zero
+Testing 'hello': Enter a number other than zero
+Testing 50.0: 2.0
+>>> val = 13
+>>> print(funnier_division(val))
 Traceback (most recent call last):
 ...
+    print(funnier_division(val))
+          ^^^^^^^^^^^^^^^^^^^^^
+...
+    raise ValueError("13 is an unlucky number")
 ValueError: 13 is an unlucky number
 
 """
 
 
-def funniest_division(divisor: int) -> Union[str, float]:
+def funniest_division(divisor: int) -> str | float:
     try:
         if divisor == 13:
             raise ValueError("13 is an unlucky number")
