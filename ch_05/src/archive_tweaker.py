@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming Case Study
 
 Chapter 5. When to Use Object-Oriented Programming
 """
-from __future__ import annotations
 import fnmatch
 from pathlib import Path
 import re
@@ -122,7 +121,7 @@ class TextTweaker(ZipProcessor):
         extracted.write_text(output_text)
 
 
-from PIL import Image  # type: ignore [import]
+from PIL import Image
 
 
 class ImgTweaker(ZipProcessor):

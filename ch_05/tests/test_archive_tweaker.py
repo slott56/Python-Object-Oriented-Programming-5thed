@@ -4,11 +4,13 @@ Python 3 Object-Oriented Programming Case Study
 Chapter 5, When to Use Object-Oriented Programming
 """
 from pathlib import Path
-from pytest import *  # type: ignore [import]
-import archive_tweaker
 import zipfile
 
-@fixture
+import pytest
+
+import archive_tweaker
+
+@pytest.fixture
 def zip_data(tmp_path):
     test_file = tmp_path/"test.zip"
     with zipfile.ZipFile(test_file, "w") as output:

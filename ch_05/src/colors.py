@@ -3,8 +3,6 @@ Python 3 Object-Oriented Programming Case Study
 
 Chapter 5, When to Use Object-Oriented Programming
 """
-from __future__ import annotations
-
 
 class Color:
     def __init__(self, rgb_value: int, name: str) -> None:
@@ -64,6 +62,8 @@ class Color_V:
             raise ValueError(f"Invalid name {name!r}")
         self._name = name
 
+    # etc.
+
     def get_name(self) -> str:
         return self._name
 
@@ -89,13 +89,14 @@ class Color_VP:
     def _get_name(self) -> str:
         return self._name
 
+    name = property(_get_name, _set_name)
+
     def _set_rgb_value(self, rgb_value: int) -> None:
         self._rgb_value = rgb_value
 
     def _get_rgb_value(self) -> int:
         return self._rgb_value
 
-    name = property(_get_name, _set_name)
     rgb_value = property(_get_rgb_value, _set_rgb_value)
 
 
@@ -151,33 +152,46 @@ Polly is pushing up daisies!
 Help on class NorwegianBlue in module colors:
 <BLANKLINE>
 class NorwegianBlue(builtins.object)
- |  NorwegianBlue(name: 'str') -> 'None'
- |  
+ |  NorwegianBlue(name: str) -> None
+ |
  |  Methods defined here:
- |  
- |  __init__(self, name: 'str') -> 'None'
+ |
+ |  __init__(self, name: str) -> None
  |      Initialize self.  See help(type(self)) for accurate signature.
- |  
+ |
  |  ----------------------------------------------------------------------
  |  Data descriptors defined here:
- |  
+ |
  |  __dict__
- |      dictionary for instance variables (if defined)
- |  
+ |      dictionary for instance variables
+ |
  |  __weakref__
- |      list of weak references to the object (if defined)
- |  
+ |      list of weak references to the object
+ |
  |  silly
  |      This is a silly property
 <BLANKLINE>
-
->>> help(NorwegianBlue.silly)
-Help on property:
-<BLANKLINE>
-    This is a silly property
-<BLANKLINE>
-
 """
+
+# Note SLIGHT differences in Python 3.12 and Python 3.13
+import sys
+if sys.version_info < (3, 13):
+    test_norwegian_blue_silly_312 = """
+    >>> help(NorwegianBlue.silly)
+    Help on property:
+    <BLANKLINE>
+        This is a silly property
+    <BLANKLINE>
+    """
+else: # sys.version_info >= (3, 13):
+    test_norwegian_blue_silly_313 = """
+    >>> help(NorwegianBlue.silly)
+    Help on property:
+    <BLANKLINE>
+    silly
+        This is a silly property
+    <BLANKLINE>
+    """
 
 
 class NorwegianBlue_P:
@@ -211,24 +225,34 @@ Getting Polly's State
 'Pining for the fjords'
 >>> del p.silly
 Polly is pushing up daisies!
-
->>> help(NorwegianBlue_P.silly)
-Help on property:
-<BLANKLINE>
-    This is a silly property
-<BLANKLINE>
-
 """
 
+if sys.version_info < (3, 13):
+    test_norwegian_blue_p_silly_312 = """
+    >>> help(NorwegianBlue_P.silly)
+    Help on property:
+    <BLANKLINE>
+        This is a silly property
+    <BLANKLINE>
+    """
+else: # sys.version_info >= (3, 13):
+    test_norwegian_blue_p_silly_313 = """
+    >>> help(NorwegianBlue_P.silly)
+    Help on property:
+    <BLANKLINE>
+    silly
+        This is a silly property
+    <BLANKLINE>
+    """
+
+
 from urllib.request import urlopen
-from typing import Optional, cast, List
-from bs4 import BeautifulSoup, Tag  # type: ignore [import]
 
 
 class WebPage:
     def __init__(self, url: str) -> None:
         self.url = url
-        self._content: Optional[bytes] = None
+        self._content: bytes | None = None
 
     @property
     def content(self) -> bytes:
@@ -236,7 +260,11 @@ class WebPage:
             print("Retrieving New Page...")
             with urlopen(self.url) as response:
                 self._content = response.read()
-        return self._content
+        return self._content or b''
+
+
+from typing import cast
+from bs4 import BeautifulSoup
 
 
 class GetColors(WebPage):
@@ -261,7 +289,7 @@ def color_demo() -> None:
     print(gc.colors)
 
 
-class AverageList(List[int]):
+class AverageList(list[int]):
     @property
     def average(self) -> float:
         return sum(self) / len(self)
