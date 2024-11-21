@@ -4,8 +4,6 @@ Python 3 Object-Oriented Programming Case Study
 Chapter 3, When Objects Are Alike
 """
 
-from collections.abc import Container
-
 
 class OddIntegers:
     def __contains__(self, x: int) -> bool:
@@ -23,6 +21,8 @@ True
 """
 
 test_instance = """
+>>> from collections.abc import Container
+
 >>> odd = OddIntegers()
 >>> isinstance(odd, Container)
 True

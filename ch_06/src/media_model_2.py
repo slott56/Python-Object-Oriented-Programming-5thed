@@ -8,18 +8,15 @@ import abc
 
 
 class MediaLoader(abc.ABC):
+    ext: str
+
     @abc.abstractmethod
     def play(self) -> None:
         ...
 
-    @property
-    @abc.abstractmethod
-    def ext(self) -> str:
-        ...
-
 
 test_abstractions = """
->>> MediaLoader.__abstractmethods__ == frozenset({'ext', 'play'})
+>>> MediaLoader.__abstractmethods__ == frozenset({'play'})
 True
 
 """
@@ -31,7 +28,8 @@ test_concrete_subclasses = """
 >>> x = Wav() 
 Traceback (most recent call last):
 ...
-TypeError: Can't instantiate abstract class Wav with abstract methods ext, play
+    x = Wav()
+TypeError: Can't instantiate abstract class Wav without an implementation for abstract method 'play'
 
 >>> class Ogg(MediaLoader): 
 ...     ext = '.ogg' 

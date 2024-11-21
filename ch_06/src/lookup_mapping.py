@@ -3,11 +3,9 @@ Python 3 Object-Oriented Programming
 
 Chapter 6, Abstract Base Classes and Operator Overloading
 """
-from __future__ import annotations
-from collections import abc
-from typing import Protocol, Any, overload, Union
 import bisect
-from typing import Iterator, Iterable, Sequence, Mapping
+from collections.abc import Iterator, Iterable, Mapping
+from typing import Protocol, Any, overload, cast
 
 
 class Comparable(Protocol):
@@ -30,36 +28,35 @@ class Comparable(Protocol):
         ...
 
 
-import sys
-
-if sys.version_info >= (3, 9):
-    BaseMapping = abc.Mapping[Comparable, Any]
-else:
-    BaseMapping = Mapping[Comparable, Any]
+# type BaseMapping = Mapping[Comparable, Any]
 
 
-class Lookup(BaseMapping):
+class Lookup(Mapping[Comparable, Any]):
     @overload
     def __init__(self, source: Iterable[tuple[Comparable, Any]]) -> None:
         ...
 
     @overload
-    def __init__(self, source: BaseMapping) -> None:
+    def __init__(self, source: "Mapping[Comparable, Any]") -> None:
         ...
 
     def __init__(
         self,
-        source: Union[Iterable[tuple[Comparable, Any]], BaseMapping, None] = None,
+        source: Any = None,
     ) -> None:
-        sorted_pairs: Sequence[tuple[Comparable, Any]]
-        if isinstance(source, Sequence):
-            sorted_pairs = sorted(source)
-        elif isinstance(source, abc.Mapping):
-            sorted_pairs = sorted(source.items())
-        else:
-            sorted_pairs = []
-        self.key_list = [p[0] for p in sorted_pairs]
-        self.value_list = [p[1] for p in sorted_pairs]
+        sorted_pairs: list[tuple[Comparable, Any]]
+        match source:
+            case Iterable() as an_iter:
+                # Assume it's pairs.
+                sorted_pairs = sorted(
+                    cast(Iterable[tuple[Comparable, Any]], an_iter)
+                )
+            case Mapping() as a_map:
+                sorted_pairs = sorted(a_map.items())
+            case _:
+                sorted_pairs = []
+        self.key_list: list[Comparable] = [p[0] for p in sorted_pairs]
+        self.value_list: list[Any] = [p[1] for p in sorted_pairs]
 
     def __len__(self) -> int:
         return len(self.key_list)
@@ -68,7 +65,10 @@ class Lookup(BaseMapping):
         return iter(self.key_list)
 
     def __contains__(self, key: object) -> bool:
-        index = bisect.bisect_left(self.key_list, key)
+        index = bisect.bisect_left(
+            self.key_list,
+            cast(Comparable, key)
+        )
         return key == self.key_list[index]
 
     def __getitem__(self, key: Comparable) -> Any:
@@ -108,6 +108,14 @@ Traceback (most recent call last):
   File "<doctest lookup_mapping.__test__.test_not_a_dict[1]>", line 1, in <module>
     x["m"] = "Maud"
 TypeError: 'Lookup' object does not support item assignment
+
+"""
+
+test_dict_init_examples = """
+>>> x = dict({"a": 42, "b": 7, "c": 6})
+>>> y = dict([("a", 42), ("b", 7), ("c", 6)])
+>>> x == y
+True
 
 """
 

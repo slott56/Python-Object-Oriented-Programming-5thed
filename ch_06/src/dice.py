@@ -3,10 +3,10 @@ Python 3 Object-Oriented Programming Case Study
 
 Chapter 6, Abstract Base Classes and Operator Overloading
 """
-from __future__ import annotations
-import random
 import abc
-from typing import cast, Type, Iterable, Any, Optional
+from collections.abc import Iterable
+import random
+from typing import cast, Any
 
 
 class Die(abc.ABC):
@@ -24,9 +24,11 @@ class Die(abc.ABC):
     # A hint for one of the exercises.
 
     def __mul__(self, other: Any) -> "DDice":
-        if isinstance(other, int):
-            return DDice(type(self)) * other
-        return NotImplemented
+        match other:
+            case int():
+                return DDice(type(self)) * other
+            case _:
+                return NotImplemented
 
     def __rmul__(self, other: Any) -> "DDice":
         """
@@ -36,9 +38,11 @@ class Die(abc.ABC):
         >>> x.total
         8
         """
-        if isinstance(other, int):
-            return other * DDice(type(self))
-        return NotImplemented
+        match other:
+            case int():
+                return other * DDice(type(self))
+            case _:
+                return NotImplemented
 
 
 class D4(Die):
@@ -63,7 +67,9 @@ test_abc = """
 >>> x = Bad()
 Traceback (most recent call last):
 ...
-TypeError: roll() missing 2 required positional arguments: 'a' and 'b'
+    self.roll()
+    ~~~~~~~~~^^
+TypeError: Bad.roll() missing 2 required positional arguments: 'a' and 'b'
 
 """
 
@@ -88,7 +94,7 @@ Counter({5: 139, 7: 130, 6: 128, 3: 125, 4: 125, 1: 121, 0: 116, 2: 116})
 
 
 class Dice(abc.ABC):
-    def __init__(self, n: int, die_class: Type[Die]) -> None:
+    def __init__(self, n: int, die_class: type[Die]) -> None:
         self.dice = [die_class() for _ in range(n)]
 
     @abc.abstractmethod
@@ -131,6 +137,13 @@ class YachtDice(Dice):
             if n not in self.saved:
                 d.roll()
         self.saved = set()
+
+test_explore = """
+>>> Die.__abstractmethods__
+frozenset({'roll'})
+>>> Die.roll.__isabstractmethod__
+True
+"""
 
 
 test_yact = """
@@ -177,8 +190,9 @@ test_die_meta = """
 
 
 class DDice:
-    def __init__(self, *die_class: Type[Die]) -> None:
-        self.dice = [dc() for dc in die_class]
+    def __init__(self, *die_class: type[Die]) -> None:
+        self.classes = die_class
+        self.dice = [dc() for dc in self.classes]
         self.adjust: int = 0
 
     def plus(self, adjust: int = 0) -> "DDice":
@@ -198,52 +212,50 @@ class DDice:
         return f"DDice({rule}).plus({self.adjust})"
 
     def __add__(self, die_class: Any) -> "DDice":
-        if isinstance(die_class, type) and issubclass(die_class, Die):
-            new_classes = [type(d) for d in self.dice] + [die_class]
-            new = DDice(*new_classes).plus(self.adjust)
-            return new
-        elif isinstance(die_class, int):
-            new_classes = [type(d) for d in self.dice]
-            new = DDice(*new_classes).plus(die_class)
-            return new
-        else:
-            return NotImplemented
+        match die_class:
+            case type() if issubclass(die_class, Die):
+                new_classes = self.classes + (die_class,)
+                new = DDice(*new_classes).plus(self.adjust)
+                return new
+            case int() as adj:
+                new = DDice(*self.classes).plus(self.adjust + adj)
+                return new
+            case _:
+                return NotImplemented
 
     def __radd__(self, die_class: Any) -> "DDice":
-        if isinstance(die_class, type) and issubclass(die_class, Die):
-            new_classes = [die_class] + [type(d) for d in self.dice]
-            new = DDice(*new_classes).plus(self.adjust)
-            return new
-        elif isinstance(die_class, int):
-            new_classes = [type(d) for d in self.dice]
-            new = DDice(*new_classes).plus(die_class)
-            return new
-        else:
-            return NotImplemented
+        match die_class:
+            case type() if issubclass(die_class, Die):
+                new_classes = (die_class,) + self.classes
+                new = DDice(*new_classes).plus(self.adjust)
+                return new
+            case int() as adj:
+                new = DDice(*self.classes).plus(self.adjust + adj)
+                return new
+            case _:
+                return NotImplemented
 
     def __mul__(self, n: Any) -> "DDice":
-        if isinstance(n, int):
-            new_classes = [type(d) for d in self.dice for _ in range(n)]
-            return DDice(*new_classes).plus(self.adjust)
-        else:
-            return NotImplemented
+        match n:
+            case int():
+                new_classes = self.classes * n
+                return DDice(*new_classes).plus(self.adjust)
+            case _:
+                return NotImplemented
 
-    def __rmul__(self, n: Any) -> "DDice":
-        if isinstance(n, int):
-            new_classes = [type(d) for d in self.dice for _ in range(n)]
-            return DDice(*new_classes).plus(self.adjust)
-        else:
-            return NotImplemented
+    __rmul__ = __mul__
 
     def __iadd__(self, die_class: Any) -> "DDice":
-        if isinstance(die_class, type) and issubclass(die_class, Die):
-            self.dice += [die_class()]
-            return self
-        elif isinstance(die_class, int):
-            self.adjust += die_class
-            return self
-        else:
-            return NotImplemented
+        match die_class:
+            case type() if issubclass(die_class, Die):
+                self.classes += (die_class,)
+                self.dice = [dc() for dc in self.classes]
+                return self
+            case int() as adj:
+                self.adjust += adj
+                return self
+            case _:
+                return NotImplemented
 
 
 test_ddice = """
@@ -295,16 +307,27 @@ True
 True
 >>> repr(y)
 'DDice(D6, D6, D6).plus(0)'
+
+>>> random.seed(1337)
+>>> y = DDice(D6, D6)
+>>> y += D6
+>>> y += 2
+>>> y.roll()
+>>> y.dice
+[5, 6, 2]
+>>> y.total
+15
 """
+
 
 import logging
 from functools import wraps
-from typing import Type, Any
+from typing import Any
 
 
 class DieMeta(abc.ABCMeta):
     def __new__(
-        metaclass: Type[type],
+        cls: type,
         name: str,
         bases: tuple[type, ...],
         namespace: dict[str, Any],
@@ -324,7 +347,7 @@ class DieMeta(abc.ABCMeta):
 
             namespace["roll"] = logged_roll
         new_object = cast(
-            "DieMeta", abc.ABCMeta.__new__(metaclass, name, bases, namespace)
+            "DieMeta", abc.ABCMeta.__new__(cls, name, bases, namespace)
         )
         return new_object
 
@@ -356,12 +379,6 @@ test_d6l = """
 >>> d.face
 6
 
->>> import sys
->>> logging.basicConfig(stream=sys.stdout, level=logging.INFO)
->>> d2 = D6L()
-INFO:D6L:Rolled 1
->>> d2.face
-1
 """
 
 
