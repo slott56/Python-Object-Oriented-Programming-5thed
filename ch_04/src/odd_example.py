@@ -7,8 +7,11 @@ Chapter 4.
 
 class EvenOnly(list[int]):
     def append(self, value: int) -> None:
-        if not isinstance(value, int):
-            raise TypeError("Only integers can be added")
+        match value:
+            case int():
+                pass
+            case _:
+                raise TypeError("Only integers can be added")
         if value % 2 != 0:
             raise ValueError("Only even numbers can be added")
         super().append(value)
@@ -18,19 +21,16 @@ test_even_only = """
 >>> e = EvenOnly()
 >>> e.append("a string")
 Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "even_integers.py", line 7, in add
-    raise TypeError("Only integers can be added")
+...
 TypeError: Only integers can be added
 
 >>> e.append(3)
 Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-  File "even_integers.py", line 9, in add
-    raise ValueError("Only even numbers can be added")
+...
 ValueError: Only even numbers can be added
 >>> e.append(2)
 """
+
 
 test_even_only_missing_methods = """
 To be complete, we need to make sure these don't work, also. 

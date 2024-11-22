@@ -1,635 +1,152 @@
 """
-Python 3 Object-Oriented Programming Case Study
+Python 3 Object-Oriented Programming
 
-Chapter 9. Strings and Serialization
+Chapter 8. The Intersection of Object-Oriented and Functional Programming
+
+Parts of this are also shown in Chapter 10.
 """
 from __future__ import annotations
-import collections
-import csv
-import datetime
-import json
-import jsonschema  # type: ignore[import]
-from math import isclose
-from pathlib import Path
 from typing import (
     cast,
-    Any,
-    Optional,
-    Union,
-    Iterator,
-    Iterable,
-    Counter,
     Callable,
-    Protocol,
-    TypedDict,
+    Iterable,
+    Iterator,
+    List,
+    NamedTuple,
+    Optional,
+    Type,
+    Union,
 )
-import weakref
-import yaml
+from collections import defaultdict, Counter
 
 
-class Sample:
-    """Abstract superclass for all samples."""
-
-    def __init__(
-        self,
-        sepal_length: float,
-        sepal_width: float,
-        petal_length: float,
-        petal_width: float,
-    ) -> None:
-        self.sepal_length = sepal_length
-        self.sepal_width = sepal_width
-        self.petal_length = petal_length
-        self.petal_width = petal_width
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"sepal_length={self.sepal_length}, "
-            f"sepal_width={self.sepal_width}, "
-            f"petal_length={self.petal_length}, "
-            f"petal_width={self.petal_width}, "
-            f")"
-        )
-
-
-class KnownSample(Sample):
-    """Abstract superclass for testing and training data, the species is set externally."""
-
-    def __init__(
-        self,
-        species: str,
-        sepal_length: float,
-        sepal_width: float,
-        petal_length: float,
-        petal_width: float,
-    ) -> None:
-        super().__init__(
-            sepal_length=sepal_length,
-            sepal_width=sepal_width,
-            petal_length=petal_length,
-            petal_width=petal_width,
-        )
-        self.species = species
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"sepal_length={self.sepal_length}, "
-            f"sepal_width={self.sepal_width}, "
-            f"petal_length={self.petal_length}, "
-            f"petal_width={self.petal_width}, "
-            f"species={self.species!r}, "
-            f")"
-        )
-
-    def __eq__(self, other: Any) -> bool:
-        other = cast(KnownSample, other)
-        return all(
-            [
-                self.sepal_length == other.sepal_length,
-                self.sepal_width == other.sepal_width,
-                self.petal_length == other.petal_length,
-                self.petal_width == other.petal_width,
-                self.species == other.species,
-            ]
-        )
-
-
-class TrainingKnownSample(KnownSample):
-    """Training data."""
-
-    pass
-
-
-class TestingKnownSample(KnownSample):
-    """Testing data. A classifier can assign a species, which may or may not be correct."""
-
-    def __init__(
-        self,
-        /,
-        species: str,
-        sepal_length: float,
-        sepal_width: float,
-        petal_length: float,
-        petal_width: float,
-        classification: Optional[str] = None,
-    ) -> None:
-        super().__init__(
-            species=species,
-            sepal_length=sepal_length,
-            sepal_width=sepal_width,
-            petal_length=petal_length,
-            petal_width=petal_width,
-        )
-        self.classification = classification
-
-    def matches(self) -> bool:
-        return self.species == self.classification
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"sepal_length={self.sepal_length}, "
-            f"sepal_width={self.sepal_width}, "
-            f"petal_length={self.petal_length}, "
-            f"petal_width={self.petal_width}, "
-            f"species={self.species!r}, "
-            f"classification={self.classification!r}, "
-            f")"
-        )
-
-
-class UnknownSample(Sample):
-    """A sample provided by a User, not yet classified."""
-
-    pass
-
-
-class ClassifiedSample(Sample):
-    """Created from a sample provided by a User, and the results of classification."""
-
-    def __init__(self, classification: str, sample: UnknownSample) -> None:
-        super().__init__(
-            sepal_length=sample.sepal_length,
-            sepal_width=sample.sepal_width,
-            petal_length=sample.petal_length,
-            petal_width=sample.petal_width,
-        )
-        self.classification = classification
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}("
-            f"sepal_length={self.sepal_length}, "
-            f"sepal_width={self.sepal_width}, "
-            f"petal_length={self.petal_length}, "
-            f"petal_width={self.petal_width}, "
-            f"classification={self.classification!r}, "
-            f")"
-        )
-
-
-class Distance:
-    """A distance computation"""
-
-    def distance(self, s1: Sample, s2: Sample) -> float:
-        raise NotImplementedError
-
-
-class Chebyshev(Distance):
-    """
-    Computes the Chebyshev distance between two samples.
-
-    ::
-
-        >>> from math import isclose
-        >>> from model import TrainingKnownSample, UnknownSample, Chebyshev
-
-        >>> s1 = TrainingKnownSample(
-        ...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
-        >>> u = UnknownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4})
-
-        >>> algorithm = Chebyshev()
-        >>> isclose(3.3, algorithm.distance(s1, u))
-        True
-
-    """
-
-    def distance(self, s1: Sample, s2: Sample) -> float:
-        return max(
-            [
-                abs(s1.sepal_length - s2.sepal_length),
-                abs(s1.sepal_width - s2.sepal_width),
-                abs(s1.petal_length - s2.petal_length),
-                abs(s1.petal_width - s2.petal_width),
-            ]
-        )
-
-
-class Minkowski(Distance):
-    """An abstraction to provide a way to implement Manhattan and Euclidean."""
-
-    m: int
-
-    def distance(self, s1: Sample, s2: Sample) -> float:
-        return (
-            sum(
-                [
-                    abs(s1.sepal_length - s2.sepal_length) ** self.m,
-                    abs(s1.sepal_width - s2.sepal_width) ** self.m,
-                    abs(s1.petal_length - s2.petal_length) ** self.m,
-                    abs(s1.petal_width - s2.petal_width) ** self.m,
-                ]
-            )
-            ** (1 / self.m)
-        )
-
-
-class Euclidean(Minkowski):
-    m = 2
-
-
-class Manhattan(Minkowski):
-    m = 1
-
-
-class Sorensen(Distance):
-    def distance(self, s1: Sample, s2: Sample) -> float:
-        return sum(
-            [
-                abs(s1.sepal_length - s2.sepal_length),
-                abs(s1.sepal_width - s2.sepal_width),
-                abs(s1.petal_length - s2.petal_length),
-                abs(s1.petal_width - s2.petal_width),
-            ]
-        ) / sum(
-            [
-                s1.sepal_length + s2.sepal_length,
-                s1.sepal_width + s2.sepal_width,
-                s1.petal_length + s2.petal_length,
-                s1.petal_width + s2.petal_width,
-            ]
-        )
-
-
-class Reduce_Function(Protocol):
-    """Define a callable object with specific parameters."""
-
-    def __call__(self, values: list[float]) -> float:
-        pass
-
-
-class Minkowski_2(Distance):
-    """A generic way to implement Manhattan, Euclidean, and Chebyshev.
-
-    ::
-
-        >>> from math import isclose
-        >>> from model import TrainingKnownSample, UnknownSample, Minkowski_2
-
-        >>> class CD(Minkowski_2):
-        ...     m = 1
-        ...     reduction = max
-
-        >>> s1 = TrainingKnownSample(
-        ...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
-        >>> u = UnknownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4})
-
-        >>> algorithm = CD()
-        >>> isclose(3.3, algorithm.distance(s1, u))
-        True
-
-    """
-
-    m: int
-    reduction: Reduce_Function
-
-    def distance(self, s1: Sample, s2: Sample) -> float:
-        # Required to prevent Python from passing `self` as the first argument.
-        summarize = self.reduction
-        return (
-            summarize(
-                [
-                    abs(s1.sepal_length - s2.sepal_length) ** self.m,
-                    abs(s1.sepal_width - s2.sepal_width) ** self.m,
-                    abs(s1.petal_length - s2.petal_length) ** self.m,
-                    abs(s1.petal_width - s2.petal_width) ** self.m,
-                ]
-            )
-            ** (1 / self.m)
-        )
-
-
-class Hyperparameter:
-    """A hyperparameter value and the overall quality of the classification."""
-
-    def __init__(self, k: int, algorithm: "Distance", training: "TrainingData") -> None:
-        self.k = k
-        self.algorithm = algorithm
-        self.data: weakref.ReferenceType["TrainingData"] = weakref.ref(training)
-        self.quality: float
-
-    def test(self) -> None:
-        """Run the entire test suite."""
-        training_data: Optional["TrainingData"] = self.data()
-        if not training_data:
-            raise RuntimeError("Broken Weak Reference")
-        pass_count, fail_count = 0, 0
-        for sample in training_data.testing:
-            sample.classification = self.classify(sample)
-            if sample.matches():
-                pass_count += 1
-            else:
-                fail_count += 1
-        self.quality = pass_count / (pass_count + fail_count)
-
-    def classify(self, sample: Union[UnknownSample, TestingKnownSample]) -> str:
-        """The k-NN algorithm"""
-        training_data = self.data()
-        if not training_data:
-            raise RuntimeError("No TrainingData object")
-        distances: list[tuple[float, TrainingKnownSample]] = sorted(
-            (self.algorithm.distance(sample, known), known)
-            for known in training_data.training
-        )
-        k_nearest = (known.species for d, known in distances[: self.k])
-        frequency: Counter[str] = collections.Counter(k_nearest)
-        best_fit, *others = frequency.most_common()
-        species, votes = best_fit
-        return species
-
-
-class TrainingData:
-    """A set of training data and testing data with methods to load and test the samples."""
-
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self.uploaded: datetime.datetime
-        self.tested: datetime.datetime
-        self.training: list[TrainingKnownSample] = []
-        self.testing: list[TestingKnownSample] = []
-        self.tuning: list[Hyperparameter] = []
-
-    def load(self, raw_data_iter: Iterable["SampleDict"]) -> None:
-        """Extract TestingKnownSample and TrainingKnownSample from raw data"""
-        for n, row in enumerate(raw_data_iter):
-            if n % 5 == 0:
-                test = TestingKnownSample(
-                    species=row["species"],
-                    sepal_length=float(row["sepal_length"]),
-                    sepal_width=float(row["sepal_width"]),
-                    petal_length=float(row["petal_length"]),
-                    petal_width=float(row["petal_width"]),
-                )
-                self.testing.append(test)
-            else:
-                train = TrainingKnownSample(
-                    species=row["species"],
-                    sepal_length=float(row["sepal_length"]),
-                    sepal_width=float(row["sepal_width"]),
-                    petal_length=float(row["petal_length"]),
-                    petal_width=float(row["petal_width"]),
-                )
-                self.training.append(train)
-        self.uploaded = datetime.datetime.now(tz=datetime.timezone.utc)
-
-    def test(self, parameter: Hyperparameter) -> None:
-        """Test this hyperparamater value."""
-        parameter.test()
-        self.tuning.append(parameter)
-        self.tested = datetime.datetime.now(tz=datetime.timezone.utc)
-
-    def classify(
-        self, parameter: Hyperparameter, sample: UnknownSample
-    ) -> ClassifiedSample:
-        return ClassifiedSample(
-            classification=parameter.classify(sample), sample=sample
-        )
-
-
-class SampleDict(TypedDict):
+class Sample(NamedTuple):
     sepal_length: float
     sepal_width: float
     petal_length: float
     petal_width: float
+
+
+class KnownSample(NamedTuple):
+    sample: Sample
     species: str
 
 
-class CSVIrisReader:
-    """
-    Attribute Information:
-       1. sepal length in cm
-       2. sepal width in cm
-       3. petal length in cm
-       4. petal width in cm
-       5. class:
-          -- Iris Setosa
-          -- Iris Versicolour
-          -- Iris Virginica
-    """
+class TestingKnownSample(NamedTuple):
+    sample: KnownSample
 
-    header = [
-        "sepal_length",  # in cm
-        "sepal_width",  # in cm
-        "petal_length",  # in cm
-        "petal_width",  # in cm
-        "species",  # Iris-setosa, Iris-versicolour, Iris-virginica
+
+class TrainingKnownSample(NamedTuple):
+    sample: KnownSample
+
+
+def training_80(s: KnownSample, i: int) -> bool:
+    return i % 5 != 0
+
+
+def training_75(s: KnownSample, i: int) -> bool:
+    return i % 4 != 0
+
+
+def training_67(s: KnownSample, i: int) -> bool:
+    return i % 3 != 0
+
+
+TrainingList = List[TrainingKnownSample]
+TestingList = List[TestingKnownSample]
+
+
+def partition(
+    samples: Iterable[KnownSample], rule: Callable[[KnownSample, int], bool]
+) -> tuple[TrainingList, TestingList]:
+
+    training_samples = [
+        TrainingKnownSample(s) for i, s in enumerate(samples) if rule(s, i)
     ]
 
-    def __init__(self, source: Path) -> None:
-        self.source = source
+    test_samples = [
+        TestingKnownSample(s) for i, s in enumerate(samples) if not rule(s, i)
+    ]
 
-    def data_iter(self) -> Iterator[dict[str, str]]:
-        with self.source.open() as source_file:
-            reader = csv.DictReader(source_file, self.header)
-            yield from reader
+    return training_samples, test_samples
 
 
-class CSVIrisReader_2:
-    """
-    Attribute Information:
-       1. sepal length in cm
-       2. sepal width in cm
-       3. petal length in cm
-       4. petal width in cm
-       5. class:
-          -- Iris Setosa
-          -- Iris Versicolour
-          -- Iris Virginica
-    """
-
-    def __init__(self, source: Path) -> None:
-        self.source = source
-
-    def data_iter(self) -> Iterator[dict[str, str]]:
-        with self.source.open() as source_file:
-            reader = csv.reader(source_file)
-            for row in reader:
-                yield dict(
-                    sepal_length=row[0],  # in cm
-                    sepal_width=row[1],  # in cm
-                    petal_length=row[2],  # in cm
-                    petal_width=row[3],  # in cm
-                    species=row[4],  # class string
-                )
-
-
-class JSONIrisReader:
-    def __init__(self, source: Path) -> None:
-        self.source = source
-
-    def data_iter(self) -> Iterator[SampleDict]:
-        with self.source.open() as source_file:
-            sample_list = json.load(source_file)
-        yield from iter(sample_list)
-
-
-class NDJSONIrisReader:
-    def __init__(self, source: Path) -> None:
-        self.source = source
-
-    def data_iter(self) -> Iterator[SampleDict]:
-        with self.source.open() as source_file:
-            for line in source_file:
-                sample = json.loads(line)
-                yield sample
-
-
-IRIS_SCHEMA = {
-    "$schema": "https://json-schema.org/draft/2019-09/hyper-schema",
-    "title": "Iris Data Schema",
-    "description": "Schema of Bezdek Iris data",
-    "type": "object",
-    "properties": {
-        "sepal_length": {"type": "number", "description": "Sepal Length in cm"},
-        "sepal_width": {"type": "number", "description": "Sepal Width in cm"},
-        "petal_length": {"type": "number", "description": "Petal Length in cm"},
-        "petal_width": {"type": "number", "description": "Sepal Width in cm"},
-        "species": {
-            "type": "string",
-            "description": "class",
-            "enum": ["Iris-setosa", "Iris-versicolor", "Iris-virginica"],
-        },
-    },
-    "required": ["sepal_length", "sepal_width", "petal_length", "petal_width"],
-}
-
-
-class ValidatingNDJSONIrisReader:
-    def __init__(self, source: Path, schema: dict[str, Any]) -> None:
-        self.source = source
-        self.validator = jsonschema.Draft7Validator(schema)
-
-    def data_iter(self) -> Iterator[SampleDict]:
-        with self.source.open() as source_file:
-            for line in source_file:
-                sample = json.loads(line)
-                if self.validator.is_valid(sample):
-                    yield sample
-                else:
-                    print(f"Invalid: {sample}")
-
-
-class YAMLIrisReader:
-    def __init__(self, source: Path) -> None:
-        self.source = source
-
-    def data_iter(self) -> Iterator[SampleDict]:
-        with self.source.open() as source_file:
-            yield from yaml.load_all(source_file, Loader=yaml.SafeLoader)
-
-
-# Special case, we don't *often* test abstract superclasses.
-# In this example, however, we can create instances of the abstract class.
-test_Sample = """
->>> x = Sample(1, 2, 3, 4)
->>> x
-Sample(sepal_length=1, sepal_width=2, petal_length=3, petal_width=4, )
-"""
-
-test_TrainingKnownSample = """
->>> s1 = TrainingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> s1
-TrainingKnownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa', )
-"""
-
-test_TestingKnownSample = """
->>> s2 = TestingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> s2
-TestingKnownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa', classification=None, )
->>> s2.classification = "wrong"
->>> s2
-TestingKnownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa', classification='wrong', )
-"""
-
-test_UnknownSample = """
->>> u = UnknownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, )
->>> u
-UnknownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, )
-"""
-
-test_ClassifiedSample = """
->>> u = UnknownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, )
->>> c = ClassifiedSample(classification="Iris-setosa", sample=u)
->>> c
-ClassifiedSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, classification='Iris-setosa', )
-"""
-
-test_Chebyshev = """
->>> s1 = TrainingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> u = UnknownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4})
-
->>> algorithm = Chebyshev()
->>> isclose(3.3, algorithm.distance(s1, u))
-True
-"""
-
-test_Euclidean = """
->>> s1 = TrainingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> u = UnknownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4})
-
->>> algorithm = Euclidean()
->>> isclose(4.50111097, algorithm.distance(s1, u))
-True
-"""
-
-test_Manhattan = """
->>> s1 = TrainingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> u = UnknownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4})
-
->>> algorithm = Manhattan()
->>> isclose(7.6, algorithm.distance(s1, u))
-True
-"""
-
-test_Sorensen = """
->>> s1 = TrainingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> u = UnknownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4})
-
->>> algorithm = Sorensen()
->>> isclose(0.2773722627, algorithm.distance(s1, u))
-True
-"""
-
-test_Hyperparameter = """
->>> td = TrainingData('test')
->>> s2 = TestingKnownSample(
-...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
->>> td.testing = [s2]
->>> t1 = TrainingKnownSample(**{"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2, "species": "Iris-setosa"})
->>> t2 = TrainingKnownSample(**{"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4, "species": "Iris-versicolor"})
->>> td.training = [t1, t2]
->>> h = Hyperparameter(k=3, algorithm=Chebyshev(), training=td)
->>> u = UnknownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2)
->>> h.classify(u)
-'Iris-setosa'
->>> h.test()
->>> print(f"data={td.name!r}, k={h.k}, quality={h.quality}")
-data='test', k=3, quality=1.0
-"""
-
-test_TrainingData = """
->>> td = TrainingData('test')
->>> raw_data = [
-... {"sepal_length": 5.1, "sepal_width": 3.5, "petal_length": 1.4, "petal_width": 0.2, "species": "Iris-setosa"},
-... {"sepal_length": 7.9, "sepal_width": 3.2, "petal_length": 4.7, "petal_width": 1.4, "species": "Iris-versicolor"},
+test_partition = """
+>>> data = [
+...     KnownSample(sample=Sample(1, 2, 3, 4), species="a"),
+...     KnownSample(sample=Sample(2, 3, 4, 5), species="b"),
+...     KnownSample(sample=Sample(3, 4, 5, 6), species="a"),
+...     KnownSample(sample=Sample(4, 5, 6, 7), species="b"),
 ... ]
->>> td.load(raw_data)
->>> h = Hyperparameter(k=3, algorithm=Chebyshev(), training=td)
->>> len(td.training)
+>>> train, test = partition(data, training_75)
+>>> len(train)
+3
+>>> len(test)
 1
->>> len(td.testing)
-1
->>> td.test(h)
->>> print(f"data={td.name!r}, k={h.k}, quality={h.quality}")
-data='test', k=3, quality=0.0
 """
+
+
+def partition_1(
+    samples: Iterable[KnownSample], rule: Callable[[KnownSample, int], bool]
+) -> tuple[TrainingList, TestingList]:
+    """One pass through the source data to create testing and training pools."""
+
+    training: TrainingList = []
+    testing: TestingList = []
+
+    for i, s in enumerate(samples):
+        training_use = rule(s, i)
+        if training_use:
+            training.append(TrainingKnownSample(s))
+        else:
+            testing.append(TestingKnownSample(s))
+
+    return training, testing
+
+
+test_partition_1 = """
+>>> data = [
+...     KnownSample(sample=Sample(1, 2, 3, 4), species="a"),
+...     KnownSample(sample=Sample(2, 3, 4, 5), species="b"),
+...     KnownSample(sample=Sample(3, 4, 5, 6), species="a"),
+...     KnownSample(sample=Sample(4, 5, 6, 7), species="b"),
+... ]
+>>> train, test = partition_1(data, training_75)
+>>> len(train)
+3
+>>> len(test)
+1
+"""
+
+
+def partition_1p(
+    samples: Iterable[KnownSample], rule: Callable[[KnownSample, int], bool]
+) -> tuple[TrainingList, TestingList]:
+    """One pass through the source data to create testing and training pools."""
+
+    pools: defaultdict[bool, list[KnownSample]] = defaultdict(list)
+    partition = ((rule(s, i), s) for i, s in enumerate(samples))
+    for usage_pool, sample in partition:
+        pools[usage_pool].append(sample)
+
+    training = [TrainingKnownSample(s) for s in pools[True]]
+    testing = [TestingKnownSample(s) for s in pools[False]]
+    return training, testing
+
+
+test_partition_1p = """
+>>> data = [
+...     KnownSample(sample=Sample(1, 2, 3, 4), species="a"),
+...     KnownSample(sample=Sample(2, 3, 4, 5), species="b"),
+...     KnownSample(sample=Sample(3, 4, 5, 6), species="a"),
+...     KnownSample(sample=Sample(4, 5, 6, 7), species="b"),
+... ]
+>>> train, test = partition_1p(data, training_75)
+>>> len(train)
+3
+>>> len(test)
+1
+"""
+
 
 __test__ = {name: case for name, case in globals().items() if name.startswith("test_")}

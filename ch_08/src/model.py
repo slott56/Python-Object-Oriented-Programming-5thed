@@ -1,151 +1,129 @@
 """
-Python 3 Object-Oriented Programming
+Python 3 Object-Oriented Programming Case Study
 
-Chapter 8. The Intersection of Object-Oriented and Functional Programming
-
-Parts of this are also shown in Chapter 10.
+Chapter 7.
 """
 from __future__ import annotations
-from typing import (
-    cast,
-    Callable,
-    Iterable,
-    Iterator,
-    List,
-    NamedTuple,
-    Optional,
-    Type,
-    Union,
-)
-from collections import defaultdict, Counter
+import collections
+from dataclasses import dataclass, asdict
+from typing import Optional, Counter, List
+import weakref
+import sys
 
 
-class Sample(NamedTuple):
+@dataclass
+class Sample:
     sepal_length: float
     sepal_width: float
     petal_length: float
     petal_width: float
 
 
-class KnownSample(NamedTuple):
-    sample: Sample
+@dataclass
+class KnownSample(Sample):
     species: str
 
 
-class TestingKnownSample(NamedTuple):
-    sample: KnownSample
+@dataclass
+class TestingKnownSample(KnownSample):
+    classification: Optional[str] = None
 
 
-class TrainingKnownSample(NamedTuple):
-    sample: KnownSample
+@dataclass
+class TrainingKnownSample(KnownSample):
+    """Cannot be classified -- there's no classification instance variable available."""
+
+    pass
 
 
-def training_80(s: KnownSample, i: int) -> bool:
-    return i % 5 != 0
+@dataclass
+class UnknownSample(Sample):
+    classification: Optional[str] = None
 
 
-def training_75(s: KnownSample, i: int) -> bool:
-    return i % 4 != 0
+class Distance:
+    """Abstact definition of a distance computation"""
+
+    def distance(self, s1: Sample, s2: Sample) -> float:
+        raise NotImplementedError
 
 
-def training_67(s: KnownSample, i: int) -> bool:
-    return i % 3 != 0
+@dataclass
+class Hyperparameter:
+    """A specific tuning parameter set with k and a distance algorithm"""
+
+    k: int
+    algorithm: Distance
+    data: weakref.ReferenceType["TrainingData"]
+
+    def classify(self, sample: Sample) -> str:
+        """The k-NN algorithm"""
+        if not (training_data := self.data()):
+            raise RuntimeError("No TrainingData object")
+        distances: list[tuple[float, TrainingKnownSample]] = sorted(
+            (self.algorithm.distance(sample, known), known)
+            for known in training_data.training
+        )
+        k_nearest = (known.species for d, known in distances[: self.k])
+        frequency: Counter[str] = collections.Counter(k_nearest)
+        best_fit, *others = frequency.most_common()
+        species, votes = best_fit
+        return species
 
 
-TrainingList = List[TrainingKnownSample]
-TestingList = List[TestingKnownSample]
+@dataclass
+class TrainingData:
+    testing: List[TestingKnownSample]
+    training: List[TrainingKnownSample]
+    tuning: List[Hyperparameter]
 
 
-def partition(
-    samples: Iterable[KnownSample], rule: Callable[[KnownSample, int], bool]
-) -> tuple[TrainingList, TestingList]:
-
-    training_samples = [
-        TrainingKnownSample(s) for i, s in enumerate(samples) if rule(s, i)
-    ]
-
-    test_samples = [
-        TestingKnownSample(s) for i, s in enumerate(samples) if not rule(s, i)
-    ]
-
-    return training_samples, test_samples
-
-
-test_partition = """
->>> data = [
-...     KnownSample(sample=Sample(1, 2, 3, 4), species="a"),
-...     KnownSample(sample=Sample(2, 3, 4, 5), species="b"),
-...     KnownSample(sample=Sample(3, 4, 5, 6), species="a"),
-...     KnownSample(sample=Sample(4, 5, 6, 7), species="b"),
-... ]
->>> train, test = partition(data, training_75)
->>> len(train)
-3
->>> len(test)
-1
+# Special case, we don't *often* test abstract superclasses.
+# In this example, however, we can create instances of the abstract class.
+test_Sample = """
+>>> x = Sample(1, 2, 3, 4)
+>>> x
+Sample(sepal_length=1, sepal_width=2, petal_length=3, petal_width=4)
 """
 
+test_TrainingKnownSample = """
+>>> s1 = TrainingKnownSample(
+...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
+>>> s1
+TrainingKnownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa')
 
-def partition_1(
-    samples: Iterable[KnownSample], rule: Callable[[KnownSample, int], bool]
-) -> tuple[TrainingList, TestingList]:
-    """One pass through the source data to create testing and training pools."""
+# This is undesirable...
 
-    training: TrainingList = []
-    testing: TestingList = []
+>>> s1.sepal_length = 0 
+>>> s1
+TrainingKnownSample(sepal_length=0, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa')
 
-    for i, s in enumerate(samples):
-        training_use = rule(s, i)
-        if training_use:
-            training.append(TrainingKnownSample(s))
-        else:
-            testing.append(TestingKnownSample(s))
+# This makes duplicate detection awkward...
 
-    return training, testing
+>>> hash(s1)
+Traceback (most recent call last):
+...
+TypeError: unhashable type: 'TrainingKnownSample'
 
-
-test_partition_1 = """
->>> data = [
-...     KnownSample(sample=Sample(1, 2, 3, 4), species="a"),
-...     KnownSample(sample=Sample(2, 3, 4, 5), species="b"),
-...     KnownSample(sample=Sample(3, 4, 5, 6), species="a"),
-...     KnownSample(sample=Sample(4, 5, 6, 7), species="b"),
-... ]
->>> train, test = partition_1(data, training_75)
->>> len(train)
-3
->>> len(test)
-1
 """
 
+test_TestingKnownSample = """
+>>> s2 = TestingKnownSample(
+...     sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species="Iris-setosa")
+>>> s2
+TestingKnownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa', classification=None)
 
-def partition_1p(
-    samples: Iterable[KnownSample], rule: Callable[[KnownSample, int], bool]
-) -> tuple[TrainingList, TestingList]:
-    """One pass through the source data to create testing and training pools."""
+# This is more expected...
 
-    pools: defaultdict[bool, list[KnownSample]] = defaultdict(list)
-    partition = ((rule(s, i), s) for i, s in enumerate(samples))
-    for usage_pool, sample in partition:
-        pools[usage_pool].append(sample)
+>>> s2.classification = "wrong"
+>>> s2
+TestingKnownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, species='Iris-setosa', classification='wrong')
+"""
 
-    training = [TrainingKnownSample(s) for s in pools[True]]
-    testing = [TestingKnownSample(s) for s in pools[False]]
-    return training, testing
-
-
-test_partition_1p = """
->>> data = [
-...     KnownSample(sample=Sample(1, 2, 3, 4), species="a"),
-...     KnownSample(sample=Sample(2, 3, 4, 5), species="b"),
-...     KnownSample(sample=Sample(3, 4, 5, 6), species="a"),
-...     KnownSample(sample=Sample(4, 5, 6, 7), species="b"),
-... ]
->>> train, test = partition_1p(data, training_75)
->>> len(train)
-3
->>> len(test)
-1
+test_UnknownSample = """
+>>> u = UnknownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, classification=None)
+>>> u
+UnknownSample(sepal_length=5.1, sepal_width=3.5, petal_length=1.4, petal_width=0.2, classification=None)
 """
 
 

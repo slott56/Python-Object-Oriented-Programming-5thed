@@ -4,6 +4,6 @@ Python 3 Object-Oriented Programming Case Study
 
 This is the *Python 3 Object-Oriented Programming, 4th ed.* case study,
 
-Chapter 9.  Strings and Serialization.
+Chapter 8.  Functional Techniques.
 
-Serialization and deserialization of data.
+Using functions and immutable objects.

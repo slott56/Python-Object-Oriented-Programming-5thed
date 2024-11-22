@@ -1,284 +1,410 @@
 # Python 3 Object-Oriented Programming
 
-Chapter 8. The Intersection of Object-Oriented and Functional Programming
+Chapter 7. Python Data Structures
 
-## Python built-in functions
-
-### The len() function
+## Empty Objects
 
 ```python
->>> len([1, 2, 3, 4])
-4
-
-```
-
-### The reversed() function
-
-```python
->>> class CustomSequence:
-...     def __init__(self, args):
-...         self._list = args
-...     def __len__(self):
-...         return 5
-...     def __getitem__(self, index):
-...         return f"x{index}"
-
->>> class FunkyBackwards(list):
-...     def __reversed__(self):
-...         return "BACKWARDS!"
-
->>> generic = [1, 2, 3, 4, 5]
->>> custom = CustomSequence([6, 7, 8, 9, 10])
->>> funkadelic = FunkyBackwards([11, 12, 13, 14, 15])
-
->>> for sequence in generic, custom, funkadelic:
-...     print(f"{sequence.__class__.__name__}: ", end="")
-...     for item in reversed(sequence):
-...         print(f"{item}, ", end="")
-...     print()
-list: 5, 4, 3, 2, 1, 
-CustomSequence: x4, x3, x2, x1, x0, 
-FunkyBackwards: B, A, C, K, W, A, R, D, S, !, 
-
-```
-
-### The enumerate() function
-
-```python
->>> from pathlib import Path
->>> with Path("docs/sample_data.md").open() as source:
-...     for index, line in enumerate(source, start=1):
-...         print(f"{index:3d}: {line.rstrip()}")
-  1: # Python 3 Object-Oriented Programming
-  2: 
-  3: Chapter 8. The Intersection of Object-Oriented and Functional Programming
-  4: 
-  5: Some sample data to show how the `enumerate()` function works.
-
-```
-
-## An alternative to method overloading
-
-```python
->>> def no_args():
-...     return "Hello, world!"
-
->>> no_args()
-'Hello, world!'
-
->>> def no_args() -> str:
-...     return "Hello, world!"
-
-```
-
-```python
->>> def mandatory_args(x, y, z): 
-...     return f"{x=}, {y=}, {z=}"
-
->>> a_variable = 42
->>> mandatory_args("a string", a_variable, True)
-"x='a string', y=42, z=True"
-
->>> from typing import Any
->>> def mandatory_args(x: Any, y: Any, z: Any) -> str: 
-...     return f"{x=}, {y=}, {z=}"
-
-```
-
-
-### Default values for parameters
-
-```python
->>> from typing import Optional
-
->>> def better_function(x: Optional[int] = None) -> str:
-...     if x is None:
-...         x = number
-...     return f"better: {x=}, {number=}"
-
->>> number = 5
->>> better_function(42)
-'better: x=42, number=5'
-
->>> number = 7
->>> better_function()
-'better: x=7, number=7'
-
-```
-
-```python
->>> def better_function_2(x: Optional[int] = None) -> str:
-...     x = number if x is None else x
-...     return f"better: {x=}, {number=}"
-
->>> number = 5
->>> better_function_2(42)
-'better: x=42, number=5'
-
->>> number = 7
->>> better_function_2()
-'better: x=7, number=7'
-
-```
-
-### Unpacking arguments
-
-```python
->>> def show_args(arg1, arg2, arg3="THREE"): 
-...     return f"{arg1=}, {arg2=}, {arg3=}" 
- 
-Unpacking a sequence 
-
->>> some_args = range(3) 
->>> show_args(*some_args)
-'arg1=0, arg2=1, arg3=2'
-
-
-Unpacking a dict
-
->>> more_args = { 
-...        "arg1": "ONE", 
-...        "arg2": "TWO"}
->>> show_args(**more_args)
-"arg1='ONE', arg2='TWO', arg3='THREE'"
-
-
-```
-
-```python
-
->>> x = {'a': 1, 'b': 2}
->>> y = {'b': 11, 'c': 3}
->>> z = {**x, **y}
->>> z
-{'a': 1, 'b': 11, 'c': 3}
-
-```
-
-## Functions are objects, too
-
-See Chapter 3 for details
-
-```python
->>> from typing import Callable
->>> def fizz(x: int) -> bool:
-...     return x % 3 == 0
->>> def buzz(x: int) -> bool:
-...     return x % 5 == 0
->>> def name_or_number(number: int, *tests: Callable[[int], bool]) -> None:
-...     for t in tests:
-...         if t(number):
-...             return t.__name__
-...     return str(number)
-
->>> name_or_number(1, fizz)
-'1'
->>> name_or_number(3, fizz)
-'fizz'
->>> name_or_number(5, fizz)
-'5'
->>> name_or_number(5, fizz, buzz)
-'buzz'
-
->>> for i in range(1, 11):
-...     print(name_or_number(i, fizz, buzz))
-1
-2
-fizz
-4
-buzz
-fizz
-7
-8
-fizz
-buzz
-
-```
-
-
-### Using functions to patch a class
-
-```python
-
->>> class A:
-...     def show_something(self):
-...         print("My class is A")
-
->>> a_object = A()
->>> a_object.show_something()
-My class is A
-
-
->>> def patched_show_something():
-...     print("My class is NOT A")
-
->>> a_object.show_something = patched_show_something
->>> a_object.show_something()
-My class is NOT A
-
->>> b_object = A()
->>> b_object.show_something()
-My class is A
-
-
-```
-
-## File I/O
-
-```python
->>> contents = "Some file contents\n"
->>> file = open("filename.txt", "w")
->>> n = file.write(contents)
->>> file.close()
-
->>> assert Path("filename.txt").read_text() == contents
->>> Path("filename.txt").unlink()
-
-```
-
-```python
-
->>> source_path = Path("requirements.txt")
->>> with source_path.open() as source_file:
-...     for line in source_file:
-...         print(line, end='')
-<BLANKLINE>
-beautifulsoup4==4.9.1
-jsonschema==3.2.0
-pyyaml==5.3.1
-pillow==8.0.1
-
-
-```
-
-### Placing it in context
-
-```python
->>> class StringJoiner(list): 
-...     def __enter__(self): 
-...         return self 
-...     def __exit__(self, type, value, tb): 
-...         self.result = "".join(self) 
-
->>> with StringJoiner("Hello") as sj:
-...     sj.append(", ")
-...     sj.extend("world")
-...     sj.append("!")
->>> sj.result
-'Hello, world!'
-
->>> with StringJoiner("Partial") as sj:
-...     sj.append(" ")
-...     sj.extend("Results")
-...     sj.append(str(2 / 0))
-...     sj.extend("Even If There's an Exception")
+>>> o = object()
+>>> o.x = 5
 Traceback (most recent call last):
   ...
-  File "<doctest examples.md[60]>", line 3, in <module>
-    sj.append(str(2 / 0))
-ZeroDivisionError: division by zero
->>> sj.result
-'Partial Results'
+  File "<stdin>", line 1, in <module>
+AttributeError: 'object' object has no attribute 'x'
 
+```
+
+```python
+>>> class MyObject: 
+...     pass 
+>>> m = MyObject()
+>>> m.x = "hello"
+>>> m.x
+'hello'
+
+```
+
+## Tuples and named tuples
+
+```python
+>>> stock = "AAPL", 123.52, 137.98, 53.15
+>>> stock2 = ("AAPL", 123.52, 137.98, 53.15)
+>>> stock == stock2
+True
+>>> stock
+('AAPL', 123.52, 137.98, 53.15)
+
+>>> a = 42,
+>>> a
+(42,)
+
+>>> b = (42, 3.14), (2.718, 2.618), 
+>>> b
+((42, 3.14), (2.718, 2.618))
+
+>>> import datetime
+>>> def middle(stock, date):
+...     symbol, current, high, low = stock
+...     return ((high + low) / 2), date
+>>> middle(("AAPL", 123.52, 137.98, 53.15), datetime.date(2020, 12, 4))
+(95.565, datetime.date(2020, 12, 4))
+
+>>> s = "AAPL", 132.76, 134.80, 130.53
+>>> high = s[2]
+>>> high
+134.8
+>>> s[1:3]
+(132.76, 134.8)
+
+>>> def high(stock):
+...     symbol, current, high, low = stock
+...     return high
+>>> high(s)
+134.8
+
+```
+
+## Named tuples via typing.NamedTuple
+
+```python
+>>> from typing import NamedTuple
+>>> class Stock(NamedTuple):
+...     symbol: str
+...     current: float
+...     high: float
+...     low: float
+>>> s = Stock("AAPL", 123.52, 137.98, 53.15)
+>>> s.high
+137.98
+>>> s[2]
+137.98
+>>> symbol, current, high, low = s
+>>> current
+123.52
+
+>>> s = Stock("AAPL", 123.52, high=137.98, low=53.15)
+>>> s.current = 122.25
+Traceback (most recent call last):
+  ...
+  File "<doctest examples.md[27]>", line 1, in <module>
+    s2.current = 122.25
+AttributeError: can't set attribute
+
+
+```
+
+```python
+>>> t = ("Relayer", ["Gates of Delirium", "Sound Chaser"])
+>>> t[1].append("To Be Over")
+>>> t
+('Relayer', ['Gates of Delirium', 'Sound Chaser', 'To Be Over'])
+
+>>> hash(t)
+Traceback (most recent call last):
+  ...
+  File "<doctest examples.md[31]>", line 1, in <module>
+    hash(t)
+TypeError: unhashable type: 'list'
+
+```
+
+```python
+>>> from typing import NamedTuple
+>>> class Stock(NamedTuple):
+...     symbol: str
+...     current: float
+...     high: float
+...     low: float
+...     @property
+...     def middle(self) -> float:
+...         return (self.high + self.low)/2
+>>> s = Stock("AAPL", 123.52, 137.98, 53.15)
+>>> s.middle
+95.565
+
+```
+
+## Dataclasses
+
+```python
+>>> from dataclasses import dataclass
+>>> @dataclass
+... class Stock:
+...     symbol: str
+...     current: float
+...     high: float
+...     low: float
+...
+>>> s = Stock("AAPL", 123.52, 137.98, 53.15)
+>>> s
+Stock(symbol='AAPL', current=123.52, high=137.98, low=53.15)
+
+>>> s.current
+123.52
+>>> s.current = 122.25
+>>> s
+Stock(symbol='AAPL', current=122.25, high=137.98, low=53.15)
+
+>>> s.unexpected_attribute = 'allowed'
+>>> s.unexpected_attribute
+'allowed'
+
+>>> stock2 = Stock(symbol='AAPL', current=122.25, high=137.98, low=53.15)
+>>> s == stock2
+True
+
+
+```
+
+```python
+>>> class StockOrdinary:
+...     def __init__(self, name: str, current: float, high: float, low: float) -> None:
+...         self.name = name
+...         self.current = current
+...         self.high = high
+...         self.low = low
+
+>>> s_ord = StockOrdinary("AAPL", 123.52, 137.98, 53.15)
+>>> s_ord
+<__main__.StockOrdinary object at ...>
+
+>>> s_ord_2 = StockOrdinary("AAPL", 123.52, 137.98, 53.15)
+>>> s_ord == s_ord_2
+False
+
+```
+
+## Dictionaries
+
+```python
+>>> stocks = {
+...     "GOOG": (1235.20, 1242.54, 1231.06),
+...     "MSFT": (110.41, 110.45, 109.84),
+... }
+
+>>> stocks["GOOG"]
+(1235.2, 1242.54, 1231.06)
+>>> stocks["RIMM"]
+Traceback (most recent call last):
+  ...
+  File "<doctest examples.md[56]>", line 1, in <module>
+    stocks.get("RIMM", "NOT FOUND")
+KeyError: 'RIMM'
+
+>>> print(stocks.get("RIMM"))
+None
+>>> stocks.get("RIMM", "NOT FOUND")
+'NOT FOUND'
+
+
+>>> stocks.setdefault("GOOG", "INVALID")
+(1235.2, 1242.54, 1231.06)
+>>> stocks.setdefault("BB", (10.87, 10.76, 10.90))
+(10.87, 10.76, 10.9)
+>>> stocks["BB"]
+(10.87, 10.76, 10.9)
+
+
+>>> for stock, values in stocks.items():
+...     print(f"{stock} last value is {values[0]}")
+...
+GOOG last value is 1235.2
+MSFT last value is 110.41
+BB last value is 10.87
+
+
+>>> stocks["GOOG"] = (1245.21, 1252.64, 1245.18)
+>>> stocks['GOOG']
+(1245.21, 1252.64, 1245.18)
+
+```
+
+```python
+
+>>> random_keys = {} 
+>>> random_keys["astring"] = "somestring" 
+>>> random_keys[5] = "aninteger" 
+>>> random_keys[25.2] = "floats work too" 
+>>> random_keys[("abc", 123)] = "so do tuples" 
+ 
+>>> class AnObject: 
+...     def __init__(self, avalue): 
+...         self.avalue = avalue 
+
+>>> my_object = AnObject(14) 
+>>> random_keys[my_object] = "We can even store objects" 
+>>> my_object.avalue = 12
+
+>>> random_keys[[1,2,3]] = "we can't use lists as keys" 
+Traceback (most recent call last):
+  ...
+  File "<doctest examples.md[72]>", line 1, in <module>
+    random_keys[[1,2,3]] = "we can't use lists as keys"
+TypeError: unhashable type: 'list'
+
+ 
+>>> for key in random_keys: 
+...     print(f"{key!r} has value {random_keys[key]!r}") 
+'astring' has value 'somestring'
+5 has value 'aninteger'
+25.2 has value 'floats work too'
+('abc', 123) has value 'so do tuples'
+<__main__.AnObject object at ...> has value 'We can even store objects'
+
+
+```
+
+```python
+
+>>> x = 2020
+>>> y = 2305843009213695971
+>>> hash(x) == hash(y)
+True
+>>> x == y
+False
+>>> {x: "x", y: "y"}
+{2020: 'x', 2305843009213695971: 'y'}
+
+```
+
+### Dictionary use cases
+
+```python
+>>> data = {
+...     "name": "GOOG",
+...     "current": 1245.21, 
+...     "range": (1252.64, 1245.18)
+... }
+>>> data
+{'name': 'GOOG', 'current': 1245.21, 'range': (1252.64, 1245.18)}
+
+>>> from typing import TypedDict, Tuple
+>>> class StockTD(TypedDict):
+...     name: str
+...     current: float
+...     range: Tuple[float, float]
+>>> data_td = StockTD(
+...     {'name': 'GOOG', 'current': 1245.21, 'range': (1252.64, 1245.18)}
+... )
+>>> data_td
+{'name': 'GOOG', 'current': 1245.21, 'range': (1252.64, 1245.18)}
+
+```
+
+### Using defaultdict
+
+```python
+>>> import collections
+>>> names = {"GOOG": "Alphabet Inc.", "AAPL": "Apple Inc."}
+>>> lookup = collections.defaultdict(lambda: "N/A", names)
+>>> lookup["GOOG"]
+'Alphabet Inc.'
+>>> lookup["COF"]
+'N/A'
+
+```
+
+
+### Counter
+
+```python
+>>> import collections
+>>> responses = [
+...     "vanilla", 
+...     "chocolate", 
+...     "vanilla", 
+...     "vanilla", 
+...     "caramel", 
+...     "strawberry", 
+...     "vanilla" 
+... ]
+
+>>> favorites = collections.Counter(responses).most_common(1)
+>>> name, frequency = favorites[0]
+>>> name
+'vanilla'
+
+```
+
+## Lists
+
+
+## Sets
+
+```python
+>>> song_library = [
+...     ("Phantom Of The Opera", "Sarah Brightman"),
+...     ("Knocking On Heaven's Door", "Guns N' Roses"),
+...     ("Captain Nemo", "Sarah Brightman"),
+...     ("Patterns In The Ivy", "Opeth"),
+...     ("November Rain", "Guns N' Roses"),
+...     ("Beautiful", "Sarah Brightman"),
+...     ("Mal's Song", "Vixy and Tony"),
+... ]
+
+>>> artists = set()
+>>> for song, artist in song_library:
+...     artists.add(artist)
+
+>>> artists == {"Guns N' Roses", 'Vixy and Tony', 'Sarah Brightman', 'Opeth'}
+True
+
+>>> artists = set(artist for song, artist in song_library)
+>>> artists == {"Guns N' Roses", 'Vixy and Tony', 'Sarah Brightman', 'Opeth'}
+True
+
+>>> "Opeth" in artists
+True
+>>> alphabetical = list(artists)
+>>> alphabetical.sort()
+>>> alphabetical
+["Guns N' Roses", 'Opeth', 'Sarah Brightman', 'Vixy and Tony']
+
+
+```
+
+```python
+>>> dusty_artists = {
+...     "Sarah Brightman",
+...     "Guns N' Roses",
+...     "Opeth",
+...     "Vixy and Tony",
+... }
+
+>>> steve_artists = {"Yes", "Guns N' Roses", "Genesis"}
+
+>>> print(f"All: {dusty_artists | steve_artists}")
+All: {'Genesis', "Guns N' Roses", 'Yes', 'Sarah Brightman', 'Opeth', 'Vixy and Tony'}
+>>> print(f"Both: {dusty_artists.intersection(steve_artists)}")
+Both: {"Guns N' Roses"}
+>>> print(
+...    f"Either but not both: {dusty_artists ^ steve_artists}"
+... )
+Either but not both: {'Genesis', 'Sarah Brightman', 'Opeth', 'Yes', 'Vixy and Tony'}
+
+>>> dusty_artists.union(steve_artists) == steve_artists.union(dusty_artists)
+True
+
+```
+
+```python
+>>> artists = {"Guns N' Roses", 'Vixy and Tony', 'Sarah Brightman', 'Opeth'}
+>>> bands = {"Opeth", "Guns N' Roses"}
+
+>>> artists.issuperset(bands)
+True
+>>> artists.issubset(bands)
+False
+>>> artists - bands
+{'Sarah Brightman', 'Vixy and Tony'}
+
+>>> bands.issuperset(artists)
+False
+>>> bands.issubset(artists)
+True
+>>> bands.difference(artists)
+set()
+>>> bands - artists
+set()
 
 ```
