@@ -1,11 +1,108 @@
 """
 Python 3 Object-Oriented Programming
 
-Chapter 7. Python Data Structures
+Chapter 8. Python Data Structures
 """
-from __future__ import annotations
-import sys
+import datetime
+from typing import NamedTuple
 
+class DailyQuote(NamedTuple):
+    symbol: str
+    date: datetime.date
+    price: float
+
+some_source_of_daily_quotes = [
+    DailyQuote("AAPL", datetime.date(2024, 11, 22), 226.20),
+    DailyQuote("AAPL", datetime.date(2024, 1, 1), 237.49),
+    DailyQuote("AAPL", datetime.date(2024, 2, 2), 164.075),
+    DailyQuote("GOOG", datetime.date(2024, 3, 3), 1826.77),
+    DailyQuote("GOOG", datetime.date(2024, 4, 4), 1847.20),
+]
+
+test_setdefault = """
+>>> summary: dict[str, list[DailyQuote]] = {}
+>>> for dq in some_source_of_daily_quotes:
+...     summary.setdefault(dq.symbol, list())
+...     summary[dq.symbol].append(dq)
+...
+[]
+...
+>>> from pprint import pprint
+>>> pprint(summary)
+{'AAPL': [DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=226.2),
+          DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=237.49),
+          DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=164.075)],
+ 'GOOG': [DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=1826.77),
+          DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=1847.2)]}
+"""
+
+test_defaultdict = """
+>>> from collections import defaultdict
+
+>>> summary: defaultdict[str, list[DailyQuote]] = defaultdict(list)
+>>> for dq in some_source_of_daily_quotes:
+...     summary[dq.symbol].append(dq)
+...
+>>> from pprint import pprint
+>>> pprint(summary)
+defaultdict(<class 'list'>,
+            {'AAPL': [DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=226.2),
+                      DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=237.49),
+                      DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=164.075)],
+             'GOOG': [DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=1826.77),
+                      DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=1847.2)]})
+
+"""
+
+
+test_counter = """
+>>> from collections import Counter
+
+>>> frequency = Counter()
+>>> for dq in some_source_of_daily_quotes:
+...     frequency[dq.symbol] += 1
+
+>>> frequency
+Counter({'AAPL': 3, 'GOOG': 2})
+
+>>> from collections import Counter
+
+>>> symbols = (dq.symbol for dq in some_source_of_daily_quotes)
+>>> frequency = Counter(symbols)
+
+>>> frequency
+Counter({'AAPL': 3, 'GOOG': 2})
+
+"""
+
+class StockQuoteSummary(dict[str, list[DailyQuote]]):
+    def __missing__(self, symbol: str) -> list[DailyQuote]:
+        self[symbol] = list()
+        return self[symbol]
+    def by_date(self, symbol: str) -> list[DailyQuote]:
+        return sorted(self[symbol], key=lambda dq: dq.date)
+
+test_stock_quote_summary = """
+>>> summary = StockQuoteSummary()
+>>> for dq in some_source_of_daily_quotes:
+...    summary[dq.symbol].append(dq)
+
+>>> for symbol in summary:
+...    print(summary.by_date(symbol))
+[DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=237.49), DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=164.075), DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=226.2)]
+[DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=1826.77), DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=1847.2)]
+"""
+
+test_hash = """
+>>> x = 2020
+>>> y = 2305843009213695971
+>>> hash(x) == hash(y)
+True
+>>> x == y
+False
+"""
+
+## Some older examples.
 
 def letter_frequency(sentence: str) -> dict[str, int]:
     frequencies: dict[str, int] = {}

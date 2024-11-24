@@ -21,8 +21,8 @@ env_list = ["3.13", "3.12", "type"]
 description = "Run test suite under {base_python}"
 deps = ["pytest", "ruff"]
 commands = [
-  ["pytest"],  # Nothing in tests
-  ["pytest", "--doctest-modules", "-vv", "--doctest-report", "udiff", "src"],
+  ["pytest"],
+  ["pytest", "--doctest-modules", "-vv", "src"],
   ["ruff", "check", "--ignore", "E402,F811"],
 ]
 

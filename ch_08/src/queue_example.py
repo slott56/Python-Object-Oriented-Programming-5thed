@@ -1,17 +1,15 @@
 """
 Python 3 Object-Oriented Programming
 
-Chapter 7. Python Data Structures
+Chapter 8. Python Data Structures
 """
-from __future__ import annotations
 import abc
 from pathlib import Path
-from typing import cast, Type, Union, List
 import time
 
 
 class DirectoryVisitor(abc.ABC):
-    queue_class: Type["PathQueue"]
+    queue_class: type["PathQueue"]
 
     def __init__(self, base: Path) -> None:
         self.queue = self.queue_class()
@@ -35,7 +33,10 @@ class DirectoryVisitor(abc.ABC):
                     self.queue.put(sub_item)
 
 
-class ListQueue(List[Path]):
+from pathlib import Path
+
+
+class ListQueue(list[Path]):
     """
     >>> lq = ListQueue()
     >>> lq.put(1)
@@ -59,6 +60,7 @@ class ListQueue(List[Path]):
         return len(self) == 0
 
 
+from pathlib import Path
 from typing import Deque
 
 
@@ -86,16 +88,10 @@ class DeQueue(Deque[Path]):
         return len(self) == 0
 
 
+from pathlib import Path
 import queue
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    BaseQueue = queue.Queue[Path]  # this is only processed by mypy
-else:
-    BaseQueue = queue.Queue  # this is not seen by mypy but will be executed at runtime.
-
-
-class ThreadQueue(BaseQueue):
+class ThreadQueue(queue.Queue[Path]):
     """
     >>> tq = ThreadQueue()
     >>> tq.put(1)
@@ -112,7 +108,7 @@ class ThreadQueue(BaseQueue):
     pass
 
 
-PathQueue = Union[ListQueue, DeQueue, ThreadQueue]
+PathQueue = ListQueue | DeQueue | ThreadQueue
 
 
 class WalkList(DirectoryVisitor):
@@ -142,7 +138,7 @@ if __name__ == "__main__":
         print(cls)
         start = time.perf_counter()
         for _ in range(100):
-            walker = cls(Path.cwd())  # type: ignore [abstract]
+            walker = cls(Path.cwd())
             walker.visit()
         end = time.perf_counter()
         performance[cls.__name__] = (end - start) * 1000

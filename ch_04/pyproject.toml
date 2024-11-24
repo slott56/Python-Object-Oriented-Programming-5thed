@@ -19,7 +19,7 @@ description = "Run test suite under {base_python}"
 deps = ["pytest", "ruff"]
 commands = [
   # ["pytest"],  # no tests directory
-  ["pytest", "--doctest-modules", "-vv", "--doctest-report", "udiff", "src"],
+  ["pytest", "--doctest-modules", "-vv", "src"],
   ["ruff", "check", "--ignore", "E402"],
 ]
 

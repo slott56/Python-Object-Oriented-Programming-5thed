@@ -1,7 +1,7 @@
 """
 Python 3 Object-Oriented Programming
 
-Chapter 7. Python Data Structures
+Chapter 8. Python Data Structures
 """
 
 from dataclasses import dataclass
@@ -16,21 +16,21 @@ class Stock:
 
 
 test_stock = """
->>> s = Stock("AAPL", 123.52, 137.98, 53.15)
+>>> s = Stock("AAPL", 226.20, 237.49, 164.075)
 >>> s
-Stock(symbol='AAPL', current=123.52, high=137.98, low=53.15)
+Stock(symbol='AAPL', current=226.2, high=237.49, low=164.075)
 
 >>> s.current
-123.52
->>> s.current = 122.25
+226.2
+>>> s.current = 229.87
 >>> s
-Stock(symbol='AAPL', current=122.25, high=137.98, low=53.15)
+Stock(symbol='AAPL', current=229.87, high=237.49, low=164.075)
 
 >>> s.unexpected_attribute = 'allowed'
 >>> s.unexpected_attribute
 'allowed'
 
->>> stock2 = Stock(symbol='AAPL', current=122.25, high=137.98, low=53.15)
+>>> stock2 = Stock("AAPL", 229.87, high=237.49, low=164.075)
 >>> s == stock2
 True
 """
@@ -77,6 +77,8 @@ True
  StockOrdered(name='GOOG', current=1826.77, high=1847.2, low=1013.54)]
 
 """
+
+
 
 test_stock_defaultdict = """
 >>> import collections
