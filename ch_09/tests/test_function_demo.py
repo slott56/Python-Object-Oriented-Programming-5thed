@@ -4,10 +4,9 @@ Python 3 Object-Oriented Programming
 Chapter 8. The Intersection of Object-Oriented and Functional Programming
 """
 
-from pytest import *
-import function_demo
 from unittest.mock import Mock, call
-
+import pytest
+import function_demo
 
 def test_task_single(capsys):
     t_1 = function_demo.Task(scheduled=42, callback=lambda x: print(f"{x=}"))
@@ -36,14 +35,14 @@ def test_task_repeat(capsys):
     assert out == "x=42\nx=55\nx=68\n"
 
 
-@fixture
+@pytest.fixture
 def mock_time(monkeypatch):
     time_module = Mock(sleep=Mock())
     monkeypatch.setattr(function_demo, "time", time_module)
     return time_module
 
 
-@fixture
+@pytest.fixture
 def mock_task():
     return Mock()
 
@@ -56,12 +55,12 @@ def test_scheduler_single(mock_time, mock_task):
     assert mock_task.mock_calls == [call(42)]
 
 
-@fixture
+@pytest.fixture
 def mock_task13():
     return Mock()
 
 
-@fixture
+@pytest.fixture
 def mock_task42():
     return Mock()
 

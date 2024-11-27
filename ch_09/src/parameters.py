@@ -3,7 +3,7 @@ Python 3 Object-Oriented Programming
 
 Chapter 8. The Intersection of Object-Oriented and Functional Programming
 """
-from __future__ import annotations
+
 from typing import Any, Optional
 
 
@@ -230,10 +230,10 @@ Create itmaybeahack_com...index.html from 'https://itmaybeahack.com'
 """
 
 
-from typing import Dict, Any
+from typing import Any
 
 
-class Options(Dict[str, Any]):
+class Options(dict[str, Any]):
     default_options: dict[str, Any] = {
         "port": 21,
         "host": "localhost",
@@ -243,8 +243,6 @@ class Options(Dict[str, Any]):
     }
 
     def __init__(self, **kwargs: Any) -> None:
-        # super().__init__(self.default_options)
-        # self.update(kwargs)
         super().__init__({**self.default_options, **kwargs})
 
 
@@ -264,7 +262,6 @@ True
 """
 
 import contextlib
-import os
 import subprocess
 import sys
 from typing import TextIO

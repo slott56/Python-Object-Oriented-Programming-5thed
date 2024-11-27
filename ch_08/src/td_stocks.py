@@ -18,41 +18,44 @@ test_syntax = """
 
 """
 
+
+from decimal import Decimal
 from typing import TypedDict
 
 class Range(TypedDict):
-    low: float
-    high: float
+    low: Decimal
+    high: Decimal
 
 class Stock(TypedDict):
     symbol: str
-    current: float
+    current: Decimal
     range: Range
 
 test_td_syntax = """
 >>> s_td = Stock(
 ...     symbol='GOOG',
-...     current=1245.21,
-...     range=Range(low=1252.64, high=1245.18)
+...     current=Decimal('166.57'),
+...     range=Range(low=Decimal('129.40'), high=Decimal('193.31'))
 ... )
 
 """
 
+from decimal import Decimal
 import datetime
 from typing import TypedDict, NotRequired
 
 class StockN(TypedDict):
     symbol: str
     name: NotRequired[str]
-    current: float
+    current: Decimal
     range: Range
     date: NotRequired[datetime.date]
 
 test_not_required = """
->>> s = StockN(symbol="RIMM", name=None, current=123.45,
-...     range=Range(low=1, high=10))
+>>> s = StockN(symbol="RIMM", name=None, current=Decimal('123.45'),
+...     range=Range(low=Decimal('1.00'), high=Decimal('200.00')))
 >>> s
-{'symbol': 'RIMM', 'name': None, 'current': 123.45, 'range': {'low': 1, 'high': 10}}
+{'symbol': 'RIMM', 'name': None, 'current': Decimal('123.45'), 'range': {'low': Decimal('1.00'), 'high': Decimal('200.00')}}
 """
 
 __test__ = {name: case for name, case in globals().items() if name.startswith("test_")}

@@ -3,34 +3,34 @@ Python 3 Object-Oriented Programming
 
 Chapter 8. Python Data Structures
 """
-
+from decimal import Decimal
 from dataclasses import dataclass
 
 
 @dataclass
 class Stock:
     symbol: str
-    current: float
-    high: float
-    low: float
+    current: Decimal
+    high: Decimal
+    low: Decimal
 
 
 test_stock = """
->>> s = Stock("AAPL", 226.20, 237.49, 164.075)
+>>> s = Stock("AAPL", Decimal('226.20'), Decimal('237.49'), Decimal('164.075'))
 >>> s
-Stock(symbol='AAPL', current=226.2, high=237.49, low=164.075)
+Stock(symbol='AAPL', current=Decimal('226.20'), high=Decimal('237.49'), low=Decimal('164.075'))
 
 >>> s.current
-226.2
->>> s.current = 229.87
+Decimal('226.20')
+>>> s.current = Decimal('229.87')
 >>> s
-Stock(symbol='AAPL', current=229.87, high=237.49, low=164.075)
+Stock(symbol='AAPL', current=Decimal('229.87'), high=Decimal('237.49'), low=Decimal('164.075'))
 
 >>> s.unexpected_attribute = 'allowed'
 >>> s.unexpected_attribute
 'allowed'
 
->>> stock2 = Stock("AAPL", 229.87, high=237.49, low=164.075)
+>>> stock2 = Stock("AAPL", Decimal('229.87'), high=Decimal('237.49'), low=Decimal('164.075'))
 >>> s == stock2
 True
 """
@@ -39,16 +39,16 @@ True
 @dataclass
 class StockDefaults:
     name: str
-    current: float = 0.0
-    high: float = 0.0
-    low: float = 0.0
+    current: Decimal = Decimal('0.00')
+    high: Decimal = Decimal('0.00')
+    low: Decimal = Decimal('0.00')
 
 
 test_stock_defaults = """
 >>> StockDefaults("GOOG")
-StockDefaults(name='GOOG', current=0.0, high=0.0, low=0.0)
->>> StockDefaults("GOOG", 1826.77, 1847.20, 1013.54)
-StockDefaults(name='GOOG', current=1826.77, high=1847.2, low=1013.54)
+StockDefaults(name='GOOG', current=Decimal('0.00'), high=Decimal('0.00'), low=Decimal('0.00'))
+>>> StockDefaults("GOOG", Decimal('166.57'), Decimal('193.31'), Decimal('129.40'))
+StockDefaults(name='GOOG', current=Decimal('166.57'), high=Decimal('193.31'), low=Decimal('129.40'))
 
 """
 
@@ -56,15 +56,15 @@ StockDefaults(name='GOOG', current=1826.77, high=1847.2, low=1013.54)
 @dataclass(order=True)
 class StockOrdered:
     name: str
-    current: float = 0.0
-    high: float = 0.0
-    low: float = 0.0
+    current: Decimal = Decimal('0.00')
+    high: Decimal = Decimal('0.00')
+    low: Decimal = Decimal('0.00')
 
 
 test_stock_ordered = """
->>> stock_ordered1 = StockOrdered("GOOG", 1826.77, 1847.20, 1013.54)
+>>> stock_ordered1 = StockOrdered("GOOG", Decimal('166.57'), Decimal('193.31'), Decimal('129.40'))
 >>> stock_ordered2 = StockOrdered("GOOG")
->>> stock_ordered3 = StockOrdered("GOOG", 1728.28, high=1733.18, low=1666.33)
+>>> stock_ordered3 = StockOrdered("GOOG", Decimal('142.45'), high=Decimal('151.85'), low=Decimal('84.95'))
 
 >>> stock_ordered1 < stock_ordered2
 False
@@ -72,9 +72,18 @@ False
 True
 >>> from pprint import pprint
 >>> pprint(sorted([stock_ordered1, stock_ordered2, stock_ordered3]))
-[StockOrdered(name='GOOG', current=0.0, high=0.0, low=0.0),
- StockOrdered(name='GOOG', current=1728.28, high=1733.18, low=1666.33),
- StockOrdered(name='GOOG', current=1826.77, high=1847.2, low=1013.54)]
+[StockOrdered(name='GOOG',
+              current=Decimal('0.00'),
+              high=Decimal('0.00'),
+              low=Decimal('0.00')),
+ StockOrdered(name='GOOG',
+              current=Decimal('142.45'),
+              high=Decimal('151.85'),
+              low=Decimal('84.95')),
+ StockOrdered(name='GOOG',
+              current=Decimal('166.57'),
+              high=Decimal('193.31'),
+              low=Decimal('129.40'))]
 
 """
 
@@ -83,32 +92,38 @@ True
 test_stock_defaultdict = """
 >>> import collections
 >>> from dataclasses import dataclass
+>>> from decimal import Decimal
 >>> @dataclass
 ... class Prices:
-...     current: float = 0.0
-...     high: float = 0.0
-...     low: float = 0.0
+...     current: Decimal = Decimal('0.00')
+...     high: Decimal = Decimal('0.00')
+...     low: Decimal = Decimal('0.00')
 ...
 >>> Prices() 
-Prices(current=0.0, high=0.0, low=0.0)
+Prices(current=Decimal('0.00'), high=Decimal('0.00'), low=Decimal('0.00'))
 
 >>> portfolio = collections.defaultdict(Prices)
 >>> portfolio["GOOG"]
-Prices(current=0.0, high=0.0, low=0.0)
->>> portfolio["AAPL"] = Prices(current=122.25, high=137.98, low=53.15)
+Prices(current=Decimal('0.00'), high=Decimal('0.00'), low=Decimal('0.00'))
+>>> portfolio["AAPL"] = Prices(Decimal('226.20'), Decimal('237.49'), Decimal('164.075'))
 
 >>> from pprint import pprint
 >>> pprint(portfolio)
 defaultdict(<class 'dc_stocks.Prices'>,
-            {'AAPL': Prices(current=122.25, high=137.98, low=53.15),
-             'GOOG': Prices(current=0.0, high=0.0, low=0.0)})
+            {'AAPL': Prices(current=Decimal('226.20'),
+                            high=Decimal('237.49'),
+                            low=Decimal('164.075')),
+             'GOOG': Prices(current=Decimal('0.00'),
+                            high=Decimal('0.00'),
+                            low=Decimal('0.00'))})
+
 
 >>> by_month = collections.defaultdict(
 ...     lambda : collections.defaultdict(Prices)
 ... )
->>> by_month["APPL"]["Jan"] = Prices(current=122.25, high=137.98, low=53.15)
+>>> by_month["APPL"]["Jan"] = Prices(Decimal('226.20'), Decimal('237.49'), Decimal('164.075'))
 >>> by_month
-defaultdict(<function <lambda> at 0x...>, {'APPL': defaultdict(<class 'dc_stocks.Prices'>, {'Jan': Prices(current=122.25, high=137.98, low=53.15)})})
+defaultdict(<function <lambda> at ...>, {'APPL': defaultdict(<class 'dc_stocks.Prices'>, {'Jan': Prices(current=Decimal('226.20'), high=Decimal('237.49'), low=Decimal('164.075'))})})
 
 """
 

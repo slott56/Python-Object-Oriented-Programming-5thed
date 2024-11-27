@@ -4,19 +4,35 @@ Python 3 Object-Oriented Programming
 Chapter 8. Python Data Structures
 """
 import datetime
+from decimal import Decimal
 from typing import NamedTuple
+
+test_dict_homogenous_example = """
+>>> from dataclasses import dataclass
+>>> @dataclass
+... class Stock:
+...     symbol: str
+...     price: Decimal
+...     high: Decimal
+...     low: Decimal
+
+>>> stocks = {
+...     "GOOG": Stock("GOOG", Decimal('166.57'), high=Decimal('193.31'), low=Decimal('129.40')),
+...     "MSFT": Stock("MSFT", Decimal('110.41'), high=Decimal('110.45'), low=Decimal('109.84')),
+... }
+"""
 
 class DailyQuote(NamedTuple):
     symbol: str
     date: datetime.date
-    price: float
+    price: Decimal
 
 some_source_of_daily_quotes = [
-    DailyQuote("AAPL", datetime.date(2024, 11, 22), 226.20),
-    DailyQuote("AAPL", datetime.date(2024, 1, 1), 237.49),
-    DailyQuote("AAPL", datetime.date(2024, 2, 2), 164.075),
-    DailyQuote("GOOG", datetime.date(2024, 3, 3), 1826.77),
-    DailyQuote("GOOG", datetime.date(2024, 4, 4), 1847.20),
+    DailyQuote("AAPL", datetime.date(2024, 11, 22), Decimal('226.20')),
+    DailyQuote("AAPL", datetime.date(2024, 1, 1), Decimal('237.49')),
+    DailyQuote("AAPL", datetime.date(2024, 2, 2), Decimal('164.075')),
+    DailyQuote("GOOG", datetime.date(2024, 3, 3), Decimal('1826.77')),
+    DailyQuote("GOOG", datetime.date(2024, 4, 4), Decimal('1847.20')),
 ]
 
 test_setdefault = """
@@ -29,11 +45,12 @@ test_setdefault = """
 ...
 >>> from pprint import pprint
 >>> pprint(summary)
-{'AAPL': [DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=226.2),
-          DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=237.49),
-          DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=164.075)],
- 'GOOG': [DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=1826.77),
-          DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=1847.2)]}
+{'AAPL': [DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=Decimal('226.20')),
+          DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=Decimal('237.49')),
+          DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=Decimal('164.075'))],
+ 'GOOG': [DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=Decimal('1826.77')),
+          DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=Decimal('1847.20'))]}
+
 """
 
 test_defaultdict = """
@@ -46,11 +63,11 @@ test_defaultdict = """
 >>> from pprint import pprint
 >>> pprint(summary)
 defaultdict(<class 'list'>,
-            {'AAPL': [DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=226.2),
-                      DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=237.49),
-                      DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=164.075)],
-             'GOOG': [DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=1826.77),
-                      DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=1847.2)]})
+            {'AAPL': [DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=Decimal('226.20')),
+                      DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=Decimal('237.49')),
+                      DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=Decimal('164.075'))],
+             'GOOG': [DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=Decimal('1826.77')),
+                      DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=Decimal('1847.20'))]})
 
 """
 
@@ -89,8 +106,8 @@ test_stock_quote_summary = """
 
 >>> for symbol in summary:
 ...    print(summary.by_date(symbol))
-[DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=237.49), DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=164.075), DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=226.2)]
-[DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=1826.77), DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=1847.2)]
+[DailyQuote(symbol='AAPL', date=datetime.date(2024, 1, 1), price=Decimal('237.49')), DailyQuote(symbol='AAPL', date=datetime.date(2024, 2, 2), price=Decimal('164.075')), DailyQuote(symbol='AAPL', date=datetime.date(2024, 11, 22), price=Decimal('226.20'))]
+[DailyQuote(symbol='GOOG', date=datetime.date(2024, 3, 3), price=Decimal('1826.77')), DailyQuote(symbol='GOOG', date=datetime.date(2024, 4, 4), price=Decimal('1847.20'))]
 """
 
 test_hash = """

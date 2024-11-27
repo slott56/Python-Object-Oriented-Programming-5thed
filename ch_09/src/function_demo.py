@@ -1,15 +1,46 @@
 """
 Python 3 Object-Oriented Programming
 
-Chapter 8. The Intersection of Object-Oriented and Functional Programming
+Chapter 9. The Intersection of Object-Oriented and Functional Programming
 """
-from __future__ import annotations
+from typing import Any
+
+
+def show_args(arg1: Any, arg2: Any, arg3: Any="THREE") -> str:
+    return f"{arg1=}, {arg2=}, {arg3=}"
+
+test_unpacking = """
+Unpacking a sequence
+
+>>> some_args = range(3)
+>>> show_args(*some_args)
+'arg1=0, arg2=1, arg3=2'
+
+Unpacking a dict
+
+>>> more_args = {
+... "arg1": "ONE",
+... "arg2": "TWO"}
+>>> show_args(**more_args)
+"arg1='ONE', arg2='TWO', arg3='THREE'"
+
+"""
+
+test_packing = """
+>>> x = {'a': 1, 'b': 2}
+>>> y = {'b': 11, 'c': 3}
+>>> z = {**x, **y}
+>>> z
+{'a': 1, 'b': 11, 'c': 3}
+
+"""
+
 import heapq
 import time
-from typing import Any, Optional, cast, Callable
+from typing import Optional, Callable
 from dataclasses import dataclass, field
 
-Callback = Callable[[int], None]
+type Callback = Callable[[int], None]
 
 
 @dataclass(frozen=True, order=True)
@@ -36,14 +67,14 @@ class Task:
         if self.delay > 0 and self.limit > 2:
             return Task(
                 current_time + self.delay,
-                cast(Callback, self.callback),  # type: ignore [misc]
+                self.callback,
                 self.delay,
                 self.limit - 1,
             )
         elif self.delay > 0 and self.limit == 2:
             return Task(
                 current_time + self.delay,
-                cast(Callback, self.callback),  # type: ignore [misc]
+                self.callback,
             )
         else:
             return None
@@ -76,9 +107,9 @@ class Scheduler:
         while self.tasks:
             next_task = heapq.heappop(self.tasks)
             if (delay := next_task.scheduled - current_time) > 0:
-                time.sleep(next_task.scheduled - current_time)
+                time.sleep(delay)
             current_time = next_task.scheduled
-            next_task.callback(current_time)  # type: ignore [misc]
+            next_task.callback(current_time)
             if again := next_task.repeat(current_time):
                 heapq.heappush(self.tasks, again)
 
@@ -124,7 +155,8 @@ class Repeater_2:
 test_workers = """
 >>> from unittest.mock import Mock, patch
 >>> expected_date = datetime.datetime(2019, 10, 26, 11, 12, 13)
->>> with patch('datetime.datetime', now=Mock(return_value=expected_date)):
+>>> mock_method = Mock(return_value=expected_date)
+>>> with patch('datetime.datetime', now=mock_method):
 ...     one(42)
 ...     two(42)
 ...     three(55)
@@ -133,7 +165,7 @@ test_workers = """
 11:12:13: Called Three
 
 >>> rpt = Repeater()
->>> with patch('datetime.datetime', now=Mock(return_value=expected_date)):
+>>> with patch('datetime.datetime', now=mock_method):
 ...     rpt.four(42)
 ...     rpt.four(43)
 ...     rpt.four(44)
@@ -142,7 +174,7 @@ test_workers = """
 11:12:13: Called Four: 3
 
 >>> rpt2 = Repeater_2()
->>> with patch('datetime.datetime', now=Mock(return_value=expected_date)):
+>>> with patch('datetime.datetime', now=mock_method):
 ...     rpt2(42)
 ...     rpt2(43)
 ...     rpt2(44)

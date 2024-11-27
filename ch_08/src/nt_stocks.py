@@ -3,35 +3,35 @@ Python 3 Object-Oriented Programming
 
 Chapter 8. Python Data Structures
 """
-
+from decimal import Decimal
 from typing import NamedTuple
 
 class Stock(NamedTuple):
     symbol: str
-    current: float
-    high: float
-    low: float
+    current: Decimal
+    high: Decimal
+    low: Decimal
 
 test_stock = """
->>> Stock("AAPL", 226.20, 237.49, 164.075)
-Stock(symbol='AAPL', current=226.2, high=237.49, low=164.075)
+>>> Stock("AAPL", Decimal('226.20'), Decimal('237.49'), Decimal('164.075'))
+Stock(symbol='AAPL', current=Decimal('226.20'), high=Decimal('237.49'), low=Decimal('164.075'))
 
->>> s2 = Stock("AAPL", 226.20, high=237.49, low=164.075)
+>>> s2 = Stock("AAPL", Decimal('226.20'), high=Decimal('237.49'), low=Decimal('164.075'))
 >>> s2
-Stock(symbol='AAPL', current=226.2, high=237.49, low=164.075)
+Stock(symbol='AAPL', current=Decimal('226.20'), high=Decimal('237.49'), low=Decimal('164.075'))
 
 >>> s2.high
-237.49
+Decimal('237.49')
 >>> s2[2]
-237.49
+Decimal('237.49')
 >>> symbol, current, high, low = s2
 >>> high
-237.49
+Decimal('237.49')
 
->>> s2.current = 229.87
+>>> s2.current = Decimal('229.87')
 Traceback (most recent call last):
   ...
-    s2.current = 229.87
+    s2.current = Decimal('229.87')
     ^^^^^^^^^^
 AttributeError: can't set attribute
 """
@@ -51,18 +51,18 @@ TypeError: unhashable type: 'list'
 
 class StockM(NamedTuple):
     symbol: str
-    current: float
-    high: float
-    low: float
+    current: Decimal
+    high: Decimal
+    low: Decimal
 
     @property
-    def middle(self) -> float:
+    def middle(self) -> Decimal:
         return (self.high + self.low) / 2
 
 test_s_m_property = """
->>> s_m = StockM("AAPL", 226.20, high=237.49, low=164.075)
+>>> s_m = StockM("AAPL", Decimal('226.20'), high=Decimal('237.49'), low=Decimal('164.075'))
 >>> s_m.middle
-200.7825
+Decimal('200.7825')
 
 """
 

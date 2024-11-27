@@ -1,7 +1,7 @@
 [project]
 name = "ch_08"
-version = "2021.4.0"
-description = "Python 3 Object-Oriented Programming, 4th ed., Chapter 8"
+version = "2025.4.0"
+description = "Python 3 Object-Oriented Programming, 5th ed., Chapter 8"
 readme = "README.md"
 requires-python = ">=3.12"
 keywords = ["Python", "object-oriented design"]
