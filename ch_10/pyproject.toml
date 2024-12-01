@@ -1,47 +1,41 @@
 [project]
-name = "classifier"
-version = "2021.4.0"
-description = "Python 3 Object-Oriented Programming, 4th ed., Chapter 10"
+name = "ch_10"
+version = "2025.4.0"
+description = "Python 3 Object-Oriented Programming, 5th ed., Chapter 10"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {file = "LICENSE.txt"}
-keywords = ["k-NN", "object-oriented design"]
+requires-python = ">=3.12"
+keywords = ["Python", "object-oriented design"]
 authors = [
   {email = "slott56@gmail.com"},
   {name = "Steven F. Lott"}
 ]
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-minversion = 3.4.0
-skipsdist = True
-envlist = testenv
+requires = ["tox>=4.19"]
+env_list = ["3.13", "3.12", "type"]
 
-[testenv]
-deps =
-  -rrequirements.txt
-  black
-  pytest==6.2.4
-  tox==3.20.0
-  mypy==0.812
-setenv =
-  PYTHONPATH = {toxinidir}/src
-  MYPYPATH = {toxinidir}/src
-  PYTHONHASHSEED = 0
-commands =
-  black src
-  python -m doctest --option ELLIPSIS docs/case_study_10.md
-  python -m doctest --option ELLIPSIS docs/examples.md
-  python -m doctest --option ELLIPSIS src/model.py
-  python -m doctest --option ELLIPSIS src/iterator_protocol.py
-  python -m doctest --option ELLIPSIS src/log_analysis.py
-  python -m pytest -vv
-  mypy src --strict --python-version 3.9
+[tool.tox.env_run_base]
+description = "Run test suite under {base_python}"
+deps = ["pytest", "ruff"]
+set_env = {PYTHONHASHSEED = "42"}
 
-[testenv:bench]
-commands =
-  mypy benches --strict --python-version 3.9
-  python benches/bench_knn.py
+commands = [
+  # ["pytest"],  # no tests here.
+  ["python", "tests/log_sample.py", "--output", "data/sample.log"],
+  ["python", "tests/log_sample.py", "--multiline", "--start", "1617667501.0", "--output", "data/multiline.log"],
+  ["pytest", "--doctest-modules", "-vv", "src"],
+  ["ruff", "check", "--ignore", "E402,F811"],
+]
 
-"""
+[tool.tox.env.type]
+description = "run type check on code base"
+deps = ["pyright", "mypy"]
+commands = [
+  ["pyright", "src"],
+  ["mypy", "src"],
+]
+
+[tool.mypy]
+show_error_codes = true
+strict = true
+python_version = "3.13"

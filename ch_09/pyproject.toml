@@ -17,7 +17,6 @@ env_list = ["3.13", "3.12", "type"]
 [tool.tox.env_run_base]
 description = "Run test suite under {base_python}"
 deps = ["pytest", "ruff"]
-set_env = {PYTHONHASHSEED = "42"}
 
 commands = [
   ["pytest"],

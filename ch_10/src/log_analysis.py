@@ -3,11 +3,30 @@ Python 3 Object-Oriented Programming
 
 Chapter 10. The Iterator Pattern
 """
-from __future__ import annotations
+from pathlib import Path
+from typing import Sequence
+
+test_extract_and_parse_manual = """
+>>> from pathlib import Path
+>>> full_log_path = Path.cwd() / "data" / "sample.log"
+>>> warning_log_path = Path.cwd() / "data" / "warnings.tab"
+
+>>> with open(full_log_path) as source:
+...     warning_lines = (line for line in source if "WARN" in line)
+...     with open(warning_log_path, 'w') as target:
+...         for line in warning_lines:
+...             target.write(line)
+70
+52
+57
+50
+"""
+
+
 import csv
 import re
 from pathlib import Path
-from typing import Match, cast, Sequence
+from typing import Match, cast
 
 
 def extract_and_parse_1(full_log_path: Path, warning_log_path: Path) -> None:
@@ -35,10 +54,10 @@ test_extract_and_parse_1 = """
 import csv
 import re
 from pathlib import Path
-from typing import Match, cast, Iterator, Tuple, TextIO
+from typing import Match, cast, Iterator, TextIO
 
 
-class WarningReformat(Iterator[Tuple[str, ...]]):
+class WarningReformat(Iterator[tuple[str, ...]]):
     pattern = re.compile(r"(\w\w\w \d\d, \d\d\d\d \d\d:\d\d:\d\d) (\w+) (.*)")
 
     def __init__(self, source: TextIO) -> None:

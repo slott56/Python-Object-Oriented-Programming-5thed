@@ -1,17 +1,50 @@
-# Python 3 Object-Oriented Programming
+"""
+Python 3 Object-Oriented Programming
 
 Chapter 10. The Iterator Pattern
 
-## Design patterns in brief
+Expects HASHSEED=42
+"""
 
-## Iterators
 
-## Comprehensions
+from collections.abc import Iterable
+from typing import Any
 
-### List comprehensions
 
-```python
+class DumbIterator:
+    def __init__(self, collection: "DumbCollection") -> None:
+        self.collection = collection
+        self.index = 0
+    def next(self) -> Any:
+        r = self.collection.data[self.index]
+        self.index += 1
+        return r
+    def done(self) -> bool:
+        return self.index == len(self.collection.data)
 
+class DumbCollection:
+    def __init__(self, source: Iterable[Any]) -> None:
+        self.data = list(source)
+    def iterator(self) -> DumbIterator:
+        return DumbIterator(self)
+
+def iter_while(some_collection: DumbCollection) -> None:
+    iterator = some_collection.iterator()
+    while not iterator.done():
+        item = iterator.next()
+        # do something with the item from some_collection...
+        print(item)
+
+test_iter_while = """
+>>> collection = DumbCollection(["1", "1", "2", "3"])
+>>> iter_while(collection)
+1
+1
+2
+3
+"""
+
+test_strings_1 = """
 >>> input_strings = ["1", "5", "28", "131", "3"]
  
 >>> output_integers = [] 
@@ -20,28 +53,27 @@ Chapter 10. The Iterator Pattern
 >>> output_integers
 [1, 5, 28, 131, 3]
 
-```
+"""
 
-```python
-
+test_strings_2 = """
 >>> input_strings = ["1", "5", "28", "131", "3"]
  
 >>> output_integers = [int(num) for num in input_strings] 
 >>> output_integers
 [1, 5, 28, 131, 3]
 
-```
+"""
 
-```python
+test_strings_3 = """
 >>> input_strings = ["1", "5", "28", "131", "3"]
 >>> output_integers = [int(num) for num in input_strings if len(num) < 3]
 >>> output_integers
 [1, 5, 28, 3]
 
-```
+"""
 
-```python
->>> from pathlib import Path, PosixPath, WindowsPath
+test_path = """
+>>> from pathlib import Path
 
 >>> chapter = Path.cwd()
 >>> paths = [path.relative_to(chapter) 
@@ -49,9 +81,10 @@ Chapter 10. The Iterator Pattern
 ...     if ">>>" in path.read_text()
 ... ]
 >>> paths.sort()
+
 >>> import sys
 >>> assert (
-...     paths == [Path('src/iterator_protocol.py'), Path('src/log_analysis.py'), Path('src/model.py')]
+...     paths == [Path('src/iterator_examples.py'), Path('src/iterator_protocol.py'), Path('src/log_analysis.py'), ]
 ... ), f"Invalid {paths!r} for {sys.platform!r}"
 
 >>> source_path = Path('src') / 'iterator_protocol.py'
@@ -76,20 +109,20 @@ Chapter 10. The Iterator Pattern
 >>> [test.name for test in test_finder.find(iterator_protocol)]
 ['iterator_protocol', 'iterator_protocol.__test__.test_iterable']
 
-
-```
+"""
 
 ### Set and dictionary comprehensions
 
-```python
 
->>> from typing import NamedTuple
+from typing import NamedTuple
 
->>> class Book(NamedTuple):
-...     author: str
-...     title: str
-...     genre: str
 
+class Book(NamedTuple):
+    author: str
+    title: str
+    genre: str
+
+test_set_dict_comprehension = """
 >>> books = [
 ...     Book("Pratchett", "Nightwatch", "fantasy"),
 ...     Book("Pratchett", "Thief Of Time", "fantasy"),
@@ -102,8 +135,8 @@ Chapter 10. The Iterator Pattern
 ... ]
 
 >>> fantasy_authors = {b.author for b in books if b.genre == "fantasy"}
->>> fantasy_authors == {'Pratchett', 'Le Guin', 'Turner', 'Jemisin'}
-True
+>>> fantasy_authors
+{'Jemisin', 'Le Guin', 'Pratchett', 'Turner'}
 
 >>> fantasy_titles = {b.title: b for b in books if b.genre == "fantasy"}
 >>> fantasy_titles
@@ -112,11 +145,12 @@ True
 Book(author='Pratchett', title='Nightwatch', genre='fantasy')
 
 
-```
+"""
 
 ## Generator expressions
 
-```python
+test_generator = """
+
 >>> from pathlib import Path
 
 >>> full_log_path = Path.cwd() / "data" / "sample.log"
@@ -136,6 +170,6 @@ Apr 05, 2021 20:03:59 WARNING Another warning sent.
 Apr 05, 2021 20:04:35 WARNING Warnings should be heeded.
 Apr 05, 2021 20:04:41 WARNING Watch for warnings.
 
+"""
 
-
-```
+__test__ = {name: case for name, case in globals().items() if name.startswith("test_")}
