@@ -4,11 +4,11 @@ Python 3 Object-Oriented Programming
 Chapter 11. Common Design Patterns
 """
 import random
-import socket_server
 from unittest.mock import Mock, call, sentinel
-from pytest import *
+import pytest
+import socket_server
 
-@fixture
+@pytest.fixture
 def fixed_seed():
     random.seed(42)
 
@@ -17,7 +17,7 @@ def test_dice_roller_ex(fixed_seed):
     assert response_1 == "Dice 6 1d6 = [6, 1, 1, 6, 3, 2]".encode("utf-8")
 
 
-@fixture
+@pytest.fixture
 def mock_socket(monkeypatch):
     accept_instance = Mock(
         send=Mock(),
@@ -38,13 +38,17 @@ def mock_socket(monkeypatch):
     monkeypatch.setattr(socket_server, 'socket', socket_module)
     return socket_module
 
-@fixture
+@pytest.fixture
 def mock_dice(monkeypatch):
-    dice_module = Mock(
-        dice_roller=Mock(return_value=b'response')
-    )
-    monkeypatch.setattr(socket_server, 'dice', dice_module)
-    return dice_module
+    # Future option; using dice.dice_roller
+    # dice_module = Mock(
+    #     dice_roller=Mock(return_value=b'response')
+    # )
+    # monkeypatch.setattr(socket_server, 'dice', dice_module)
+    # Current setting: using dice_roller_ex
+    dice_roller=Mock(return_value=b'response')
+    monkeypatch.setattr(socket_server, 'dice_roller_ex', dice_roller)
+    return dice_roller
 
 def test_dice_response(mock_socket, mock_dice):
     listen_instance = mock_socket.socket.return_value
@@ -59,12 +63,12 @@ def test_dice_response(mock_socket, mock_dice):
     ]
 
 
-@fixture
+@pytest.fixture
 def mock_response():
     return Mock(return_value="some response")
 
 def test_main_1(mock_socket, mock_response, fixed_seed):
-    with raises(KeyboardInterrupt):
+    with pytest.raises(KeyboardInterrupt):
         socket_server.main_1()
     assert mock_socket.socket.mock_calls == [
         call(sentinel.AF_INET, sentinel.SOCK_STREAM)
@@ -82,11 +86,11 @@ def test_main_1(mock_socket, mock_response, fixed_seed):
         call(1024), call(1024),
     ]
     assert accept_instance.send.mock_calls == [
-        call(b'Dice2 2 4d6d1 = [7, 7]')
+        call(b'Dice2 2 4d6d1 = [6, 1, 1, 6, 3, 2]')
     ]
 
 def test_main_2(mock_socket, mock_response, fixed_seed, capsys):
-    with raises(KeyboardInterrupt):
+    with pytest.raises(KeyboardInterrupt):
         socket_server.main_1()
     out, err = capsys.readouterr()
     assert out == ""
@@ -106,6 +110,6 @@ def test_main_2(mock_socket, mock_response, fixed_seed, capsys):
         call(1024), call(1024),
     ]
     assert accept_instance.send.mock_calls == [
-        call(b'Dice2 2 4d6d1 = [7, 7]')
+        call(b'Dice2 2 4d6d1 = [6, 1, 1, 6, 3, 2]')
     ]
 

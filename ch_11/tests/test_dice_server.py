@@ -5,10 +5,9 @@ Chapter 11. Common Design Patterns
 """
 import gzip
 import io
-import random
-import dice_server
 from unittest.mock import Mock, call, sentinel
-from pytest import *
+import dice_server
+import pytest
 
 
 def test_zip_roller():
@@ -31,7 +30,7 @@ def test_log_roller(capsys):
     assert out == "Receiving b'request' from ('remote', 4021)\nSending b'response bytes' to ('remote', 4021)\n"
 
 
-@fixture
+@pytest.fixture
 def mock_socket(monkeypatch):
     accept_instance = Mock(
         send=Mock(),
@@ -52,7 +51,7 @@ def mock_socket(monkeypatch):
     monkeypatch.setattr(dice_server, 'socket', socket_module)
     return socket_module
 
-@fixture
+@pytest.fixture
 def mock_dice(monkeypatch):
     dice_module = Mock(
         dice_roller=Mock(return_value=b'response')
@@ -60,7 +59,7 @@ def mock_dice(monkeypatch):
     monkeypatch.setattr(dice_server, 'dice', dice_module)
     return dice_module
 
-@fixture
+@pytest.fixture
 def mock_ZipRoller(monkeypatch):
     mock_instance = Mock(return_value=b'response')
     mock_class = Mock(return_value=mock_instance)

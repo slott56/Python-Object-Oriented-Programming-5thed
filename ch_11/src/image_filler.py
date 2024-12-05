@@ -3,13 +3,12 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
-from __future__ import annotations
 import abc
 from pathlib import Path
-from PIL import Image  # type: ignore [import]
-from typing import Tuple
+import PIL.Image as image_module
+from PIL.Image import Image  # Image class from Image module
 
-Size = Tuple[int, int]
+type Size = tuple[int, int]
 
 
 class FillAlgorithm(abc.ABC):
@@ -20,8 +19,8 @@ class FillAlgorithm(abc.ABC):
 
 class TiledStrategy(FillAlgorithm):
     def make_background(self, img_file: Path, desktop_size: Size) -> Image:
-        in_img = Image.open(img_file)
-        out_img = Image.new("RGB", desktop_size)
+        in_img = image_module.open(img_file)
+        out_img = image_module.new("RGB", desktop_size)
         num_tiles = [o // i + 1 for o, i in zip(out_img.size, in_img.size)]
         for x in range(num_tiles[0]):
             for y in range(num_tiles[1]):
@@ -39,8 +38,8 @@ class TiledStrategy(FillAlgorithm):
 
 class CenteredStrategy(FillAlgorithm):
     def make_background(self, img_file: Path, desktop_size: Size) -> Image:
-        in_img = Image.open(img_file)
-        out_img = Image.new("RGB", desktop_size)
+        in_img = image_module.open(img_file)
+        out_img = image_module.new("RGB", desktop_size)
         left = (out_img.size[0] - in_img.size[0]) // 2
         top = (out_img.size[1] - in_img.size[1]) // 2
         out_img.paste(
@@ -52,7 +51,7 @@ class CenteredStrategy(FillAlgorithm):
 
 class ScaledStrategy(FillAlgorithm):
     def make_background(self, img_file: Path, desktop_size: Size) -> Image:
-        in_img = Image.open(img_file)
+        in_img = image_module.open(img_file)
         out_img = in_img.resize(desktop_size)
         return out_img
 
@@ -79,6 +78,9 @@ def main() -> None:
     scaled_desktop = Resizer(ScaledStrategy())
     scaled_image = scaled_desktop.resize(image_file, (1920, 1080))
     scaled_image.show()
+
+
+type FillAlgorithm_T = TiledStrategy | CenteredStrategy | ScaledStrategy
 
 
 if __name__ == "__main__":

@@ -3,11 +3,11 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
+from unittest.mock import Mock, call
+import pytest
 import image_filler
-from pytest import *
-from unittest.mock import Mock, call, sentinel
 
-@fixture
+@pytest.fixture
 def mock_image(monkeypatch):
     input_image = Mock(
         size=(512, 384),
@@ -17,12 +17,12 @@ def mock_image(monkeypatch):
         paste=Mock(),
         size=(1920, 1080)
     )
-    image_class = Mock(
+    image_module = Mock(
         open=Mock(return_value=input_image),
         new=Mock(return_value=output_image)
     )
-    monkeypatch.setattr(image_filler, 'Image', image_class)
-    return image_class
+    monkeypatch.setattr(image_filler, 'image_module', image_module)
+    return image_module
 
 def test_tiled_strategy(mock_image, tmp_path):
     ts = image_filler.TiledStrategy()

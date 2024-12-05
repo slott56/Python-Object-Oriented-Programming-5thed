@@ -4,11 +4,10 @@ Python 3 Object-Oriented Programming
 Chapter 11. Common Design Patterns
 """
 import random
+import pytest
 import dice
-from unittest.mock import Mock, call, sentinel
-from pytest import *
 
-@fixture
+@pytest.fixture
 def fixed_seed():
     random.seed(42)
 
@@ -46,7 +45,7 @@ def test_dice_roller(fixed_seed):
     assert response_1 == b"Dice2 2 2d6 = [7, 7]"
     response_2 = dice.dice_roller(b"Dice 2 4d6d1")
     assert response_2 == b"Dice 2 4d6d1 = [7, 18]"
-    with raises(ValueError):
+    with pytest.raises(ValueError):
         dice.dice_roller(b"nothing recognizable")
-    with raises(KeyError):
+    with pytest.raises(KeyError):
         dice.dice_roller(b"bad 2 2d6")

@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-from __future__ import annotations
 import unittest
 from typing import Optional
 

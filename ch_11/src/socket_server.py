@@ -5,7 +5,7 @@ Chapter 11. Common Design Patterns
 """
 import contextlib
 import socket
-import dice
+# Future: import dice
 from typing import cast
 
 import random
@@ -21,11 +21,12 @@ def dice_roller_ex(request: bytes) -> bytes:
 def dice_response(client: socket.socket) -> None:
     request = client.recv(1024)
     try:
-        # response = dice_roller_ex(request)
-        response = dice.dice_roller(request)
+        # Future: response = dice.dice_roller(request)
+        response = dice_roller_ex(request)
     except (ValueError, KeyError) as ex:
         response = repr(ex).encode("utf-8")
     client.send(response)
+
 
 
 class LogSocket:
@@ -67,7 +68,7 @@ def main_2() -> None:
     with contextlib.closing(server):
         while True:
             client, addr = server.accept()
-            logging_socket = cast(socket.socket, LogSocket(client))
+            logging_socket = cast(socket.socket, LogSocket(client)) # New
             dice_response(logging_socket)
             client.close()
 

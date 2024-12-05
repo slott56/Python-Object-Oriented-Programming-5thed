@@ -3,85 +3,83 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
-from __future__ import annotations
-from typing import Optional, Iterable, Iterator, cast
+import abc
 
+class NMEA_State(abc.ABC):
+    @staticmethod
+    def enter(message: "Message") -> None:
+        pass
 
-class NMEA_State:
-    def enter(self, message: "Message") -> "NMEA_State":
-        return self
+    @staticmethod
+    @abc.abstractmethod
+    def feed_byte(message: "Message", input: int) -> "type[NMEA_State]":
+        ...
 
-    def feed_byte(self, message: "Message", input: int) -> "NMEA_State":
-        return self
-
-    def valid(self, message: "Message") -> bool:
+    @staticmethod
+    def valid(message: "Message") -> bool:
         return False
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}()"
 
 
 class Waiting(NMEA_State):
-    def feed_byte(self, message: "Message", input: int) -> "NMEA_State":
+    @staticmethod
+    def feed_byte(message: "Message", input: int) -> type[NMEA_State]:
         if input == ord(b"$"):
-            return HEADER
-        return self
+            return Header
+        return Waiting
 
 
 class Header(NMEA_State):
-    def enter(self, message: "Message") -> "NMEA_State":
+    @staticmethod
+    def enter(message: "Message") -> None:
         message.reset()
-        return self
 
-    def feed_byte(self, message: "Message", input: int) -> "NMEA_State":
+    @staticmethod
+    def feed_byte(message: "Message", input: int) -> type[NMEA_State]:
         if input == ord(b"$"):
-            return HEADER
+            return Header
         size = message.body_append(input)
         if size == 5:
-            return BODY
-        return self
+            return Body
+        return Header
 
 
 class Body(NMEA_State):
-    def feed_byte(self, message: "Message", input: int) -> "NMEA_State":
+    @staticmethod
+    def feed_byte(message: "Message", input: int) -> type[NMEA_State]:
         if input == ord(b"$"):
-            return HEADER
+            return Header
         if input == ord(b"*"):
-            return CHECKSUM
-        size = message.body_append(input)
-        return self
+            return Checksum
+        message.body_append(input)
+        return Body
 
 
 class Checksum(NMEA_State):
-    def feed_byte(self, message: "Message", input: int) -> "NMEA_State":
+    @staticmethod
+    def feed_byte(message: "Message", input: int) -> type[NMEA_State]:
         if input == ord(b"$"):
-            return HEADER
+            return Header
         if input in {ord(b"\n"), ord(b"\r")}:
             # Incomplete checksum... Will be invalid.
-            return END
+            return End
         size = message.checksum_append(input)
         if size == 2:
-            return END
-        return self
+            return End
+        return Checksum
 
 
 class End(NMEA_State):
-    def feed_byte(self, message: "Message", input: int) -> "NMEA_State":
+    @staticmethod
+    def feed_byte(message: "Message", input: int) -> type[NMEA_State]:
         if input == ord(b"$"):
-            return HEADER
+            return Header
         elif input not in {ord(b"\n"), ord(b"\r")}:
-            return WAITING
-        return self
+            return Waiting
+        return End
 
-    def valid(self, message: "Message") -> bool:
+    @staticmethod
+    def valid(message: "Message") -> bool:
         return message.valid
-
-
-WAITING = Waiting()
-HEADER = Header()
-BODY = Body()
-CHECKSUM = Checksum()
-END = End()
 
 
 class Message:
@@ -135,18 +133,22 @@ class Message:
         )
 
 
+from typing import Iterable, Iterator, cast
+
+
 class Reader:
     def __init__(self) -> None:
         self.buffer = Message()
-        self.state: NMEA_State = WAITING
+        self.state: type[NMEA_State] = Waiting
 
     def read(self, source: Iterable[bytes]) -> Iterator[Message]:
         for byte in source:
             new_state = self.state.feed_byte(self.buffer, cast(int, byte))
             if self.buffer.valid:
                 yield self.buffer
+                # Ready for the next...
                 self.buffer = Message()
-                new_state = WAITING
+                new_state = Waiting
             if new_state != self.state:
                 # self.state.exit()  # A common extension
                 new_state.enter(self.buffer)

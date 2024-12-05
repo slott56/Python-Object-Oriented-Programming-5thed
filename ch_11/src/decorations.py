@@ -108,7 +108,7 @@ class NamedLogger:
 test_named_log = """
 >>> @NamedLogger("log4")
 ... def test4(median: float, sample: float) -> float:
-...     return abs(sample-median)
+...     return abs(sample - median)
 
 >>> test4(12, 14)
 2
@@ -147,4 +147,4 @@ if __name__ == "__main__":
 
     test4 = NamedLogger("log4")(test4)
     test4(12, 14)
-    test4("hello", "world")
+    test4("hello", "world")  # pyright: ignore

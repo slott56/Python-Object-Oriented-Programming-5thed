@@ -1,46 +1,42 @@
 [project]
-name = "classifier"
-version = "2021.4.0"
-description = "Python 3 Object-Oriented Programming, 4th ed., Chapter 11"
+name = "ch_11"
+version = "2025.4.0"
+description = "Python 3 Object-Oriented Programming, 5th ed., Chapter 11"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {file = "LICENSE.txt"}
-keywords = ["k-NN", "object-oriented design"]
+requires-python = ">=3.12"
+keywords = ["Python", "object-oriented design"]
 authors = [
   {email = "slott56@gmail.com"},
   {name = "Steven F. Lott"}
 ]
+dependencies = [
+    "pillow>=11.0.0",
+]
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-minversion = 3.4.0
-skipsdist = True
+requires = ["tox>=4.19"]
+env_list = ["3.13", "3.12", "type"]
 
-[testenv]
-deps =
-  -rrequirements.txt
-  black
-  pytest==6.2.4
-  tox==3.20.0
-  mypy==0.812
-setenv =
-  PYTHONPATH = {toxinidir}/src
-  PYTHONHASHSEED = 0
-commands =
-  black src
-  python -m doctest --option ELLIPSIS docs/examples.md
-  python -m doctest --option ELLIPSIS src/dice.py
-  python -m doctest --option ELLIPSIS src/socket_client.py
-  python -m doctest --option ELLIPSIS src/socket_server.py
-  python -m doctest --option ELLIPSIS src/dice_server.py
-  python -m doctest --option ELLIPSIS src/decorations.py
-  python -m doctest --option ELLIPSIS src/inventory.py
-  python -m doctest --option ELLIPSIS src/nmea_states.py
-  python -m doctest --option ELLIPSIS src/nmea_states_2.py
-  python -m doctest --option ELLIPSIS src/model.py
-  python -m doctest --option ELLIPSIS bonus/zonk_score.py
-  python -m pytest
-  mypy --strict --show-error-codes src
+[tool.tox.env_run_base]
+description = "Run test suite under {base_python}"
+deps = ["pytest", "ruff"]
+set_env = {PYTHONHASHSEED = "42"}
 
-"""
+commands = [
+  ["pytest", "-v"],
+  ["pytest", "--doctest-modules", "-vv", "src"],
+  ["ruff", "check", "--ignore", "E402,F811"],
+]
+
+[tool.tox.env.type]
+description = "run type check on code base"
+deps = ["pyright", "mypy"]
+commands = [
+  ["pyright", "src"],
+  ["mypy", "src"],
+]
+
+[tool.mypy]
+show_error_codes = true
+strict = true
+python_version = "3.13"

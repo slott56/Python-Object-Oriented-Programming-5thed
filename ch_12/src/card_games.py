@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 12. Advanced Python Design Patterns
 """
-from __future__ import annotations
 import abc
 import collections
 import random

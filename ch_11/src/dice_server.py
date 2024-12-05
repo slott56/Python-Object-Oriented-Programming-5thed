@@ -8,7 +8,7 @@ import dice
 import gzip
 import io
 import socket
-from typing import cast, Callable, Tuple
+from collections.abc import Callable
 
 
 class ZipRoller:
@@ -24,7 +24,7 @@ class ZipRoller:
         return buffer.getvalue()
 
 
-Address = Tuple[str, int]
+type Address = tuple[str, int]
 
 
 class LogRoller:

@@ -3,12 +3,11 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
-from __future__ import annotations
 import random
 import json
 import time
 from dice import Dice
-from typing import List, Protocol
+from typing import Protocol
 
 
 class Observer(Protocol):
@@ -31,7 +30,7 @@ class Observable:
             observer()
 
 
-Hand = List[int]
+type Hand = list[int]
 
 
 class ZonkHandHistory(Observable):

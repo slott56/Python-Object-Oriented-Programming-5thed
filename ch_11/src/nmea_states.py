@@ -3,9 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
-from __future__ import annotations
-from typing import Optional, Iterable, Iterator, cast
-
 
 class NMEA_State:
     def __init__(self, message: "Message") -> None:
@@ -35,7 +32,6 @@ class Header(NMEA_State):
 
     def feed_byte(self, input: int) -> NMEA_State:
         if input == ord(b"$"):
-            # Reset any accumulated bytes
             return Header(self.message)
         size = self.message.body_append(input)
         if size == 5:
@@ -76,6 +72,7 @@ class End(NMEA_State):
 
     def valid(self) -> bool:
         return self.message.valid
+
 
 
 class Message:
@@ -127,6 +124,9 @@ class Message:
             + b"*"
             + bytes(self.checksum_source[: self.checksum_len])
         )
+
+
+from typing import Iterable, Iterator, cast
 
 
 class Reader:

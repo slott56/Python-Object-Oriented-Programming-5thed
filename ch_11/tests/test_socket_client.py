@@ -3,11 +3,11 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
-import socket_client
 from unittest.mock import Mock, call, sentinel
-from pytest import *
+import pytest
+import socket_client
 
-@fixture
+@pytest.fixture
 def mock_socket(monkeypatch):
     mock_instance = Mock(
         connect=Mock(),
@@ -23,7 +23,7 @@ def mock_socket(monkeypatch):
     monkeypatch.setattr(socket_client, 'socket', socket_module)
     return socket_module
 
-@fixture
+@pytest.fixture
 def mock_input(monkeypatch):
     input_function = Mock(
         side_effect=["42", "4d6d1"]

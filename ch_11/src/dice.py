@@ -3,11 +3,8 @@ Python 3 Object-Oriented Programming
 
 Chapter 11. Common Design Patterns
 """
-from __future__ import annotations
 import abc
-import re
 import random
-from typing import cast, Optional, Union, Sequence
 
 
 class Adjustment(abc.ABC):
@@ -49,9 +46,11 @@ class Minus(Adjustment):
         dice.modifier -= self.amount
 
 
+import re
+
 class Dice:
     def __init__(self, n: int, d: int, *adj: Adjustment) -> None:
-        self.adjustments = [cast(Adjustment, Roll(n, d))] + list(adj)
+        self.adjustments = [Roll(n, d)] + list(adj)
         self.dice: list[int]
         self.modifier: int
 
@@ -62,7 +61,7 @@ class Dice:
 
     @classmethod
     def from_text(cls, dice_text: str) -> "Dice":
-        dice_pattern = re.compile(r"(?P<n>\d*)d(?P<d>\d+)(?P<a>[dk+-]\d+)*")
+        dice_pattern = re.compile(r"(?P<n>\d*)d(?P<d>\d+)(?P<a>(?:[dk+-]\d+)*)")
         adjustment_pattern = re.compile(r"([dk+-])(\d+)")
         adj_class: dict[str, type[Adjustment]] = {
             "d": Drop,
@@ -110,7 +109,7 @@ class Dice2:
 
 
 # Instead of an abstract class, rely on duck typing...
-DiceRoller = Union[Dice2, Dice]
+type DiceRoller = Dice2 | Dice
 implementations: dict[str, type[DiceRoller]] = {"Dice2": Dice2, "Dice": Dice}
 
 
@@ -126,13 +125,26 @@ def dice_roller(request: bytes) -> bytes:
     response = f"{request_text} = {numbers}"
     return response.encode("utf-8")
 
+test_dice_manual = """
+>>> import random
+>>> random.seed(42)
+
+>>> d = Dice(4, D6, Keep(3), Plus(2))
+>>> d.roll()
+10
+>>> d.dice
+[1, 1, 6]
+"""
 
 test_dice = """
 >>> import random
 >>> random.seed(42)
->>> d_1 = Dice.from_text("4d6k3")
+
+>>> d_1 = Dice.from_text("4d6k3+2")
 >>> d_1.roll()
-8
+10
+>>> d_1.dice
+[1, 1, 6]
 
 """
 
