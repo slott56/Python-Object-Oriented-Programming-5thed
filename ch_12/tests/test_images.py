@@ -3,12 +3,18 @@ Python 3 Object-Oriented Programming
 
 Chapter 12. Advanced Python Design Patterns
 """
-import images
-from pytest import *
 from pathlib import Path
 from unittest.mock import Mock, call
+import pytest
 
-@fixture
+import images
+
+def test_jar_finding():
+    """Highly localized to author's environment."""
+    p = images.PlantUML(plantjar="plantuml-1.2024.7.jar")
+    assert p.plantjar == (Path.cwd().parent.parent / "plantuml-1.2024.7.jar")
+
+@pytest.fixture
 def mock_files(tmp_path):
     (tmp_path / ".tox").mkdir()
     (tmp_path / "f1.uml").write_text("@startuml\n")
@@ -25,7 +31,7 @@ def test_find_uml(mock_files):
         (Path("f2.uml"), Path("y.png")),
     ]
 
-@fixture
+@pytest.fixture
 def mock_subprocess(monkeypatch):
     mock_module = Mock()
     monkeypatch.setattr(images, "subprocess", mock_module)
@@ -39,12 +45,12 @@ def test_plant_uml(mock_subprocess, tmp_path):
     assert mock_subprocess.run.mock_calls == [
         call(
             ["java", "-jar", "plantuml.jar", "-progress", "f2.uml"],
-            env={"GRAPHVIZ_DOT": "graphviz"},
+            env={}, # "GRAPHVIZ_DOT": "graphviz"},
             check=True
         )
     ]
 
-@fixture
+@pytest.fixture
 def mock_finder():
     mock_uml = Mock(
         stat=Mock(
@@ -66,7 +72,7 @@ def mock_finder():
         )
     )
 
-@fixture
+@pytest.fixture
 def mock_painter():
     return Mock()
 

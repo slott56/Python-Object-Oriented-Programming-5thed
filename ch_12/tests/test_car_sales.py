@@ -7,14 +7,13 @@ import csv
 import datetime
 import io
 from pathlib import Path
-from pytest import *
-import sys
 from unittest.mock import Mock
+import pytest
 
 import car_sales
 
 def test_new_vehicles_query(capsys, monkeypatch):
-    connection = car_sales.test_setup(":memory:")
+    connection = car_sales.db_preparation(":memory:")
     monkeypatch.setattr(car_sales.sqlite3, 'connect', Mock(return_value=connection))
     nvq = car_sales.NewVehiclesQuery(":memory:")
     nvq.process_format()
@@ -27,7 +26,7 @@ def test_new_vehicles_query(capsys, monkeypatch):
     ]
 
 
-@fixture
+@pytest.fixture
 def mock_datetime(monkeypatch):
     module = Mock(
         date=Mock(
@@ -41,7 +40,7 @@ def mock_datetime(monkeypatch):
 
 def test_sales_gross_query(mock_datetime, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    connection = car_sales.test_setup(":memory:")
+    connection = car_sales.db_preparation(":memory:")
     monkeypatch.setattr(car_sales.sqlite3, 'connect', Mock(return_value=connection))
     sgq = car_sales.SalesGrossQuery(":memory:")
     sgq.process_format()

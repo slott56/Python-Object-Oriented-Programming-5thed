@@ -5,17 +5,10 @@ Chapter 12. Advanced Python Design Patterns
 """
 import abc
 import weakref
+from collections.abc import Sequence, Iterator
 from dataclasses import dataclass
-from math import radians, floor, fmod
-from typing import (
-    Optional,
-    cast,
-    Container,
-    overload,
-    Union,
-    Sequence,
-    Iterator,
-)
+from math import radians, floor
+from typing import cast, overload
 
 
 @dataclass(frozen=True)
@@ -93,7 +86,7 @@ class Buffer(Sequence[int]):
     def __getitem__(self, index: slice) -> bytes:
         ...
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[int, bytes]:
+    def __getitem__(self, index: int | slice) -> int | bytes:
         return self.content[index]
 
 
@@ -105,7 +98,7 @@ class Message(abc.ABC):
     def __init__(self) -> None:
         self.buffer: weakref.ReferenceType[Buffer]
         self.offset: int
-        self.end: Optional[int]
+        self.end: int | None
         self.commas: list[int]
 
     def from_buffer(self, buffer: Buffer, offset: int) -> "Message":
@@ -253,7 +246,7 @@ Point(latitude=49.274166666666666, longitude=-123.18533333333333)
 """
 
 
-def message_factory(header: bytes) -> Optional[Message]:
+def message_factory(header: bytes) -> Message | None:
     # TODO: Add functools.lru_cache to save storage and time
     if header == b"GPGGA":
         return GPGGA()

@@ -8,7 +8,7 @@ import argparse
 import contextlib
 from pathlib import Path
 import sys
-from typing import Union, Optional, cast
+from typing import cast
 
 
 class Node(abc.ABC):
@@ -17,7 +17,7 @@ class Node(abc.ABC):
         name: str,
     ) -> None:
         self.name = name
-        self.parent: Optional["Folder"] = None
+        self.parent: "Folder | None" = None
 
     def move(self, new_place: "Folder") -> None:
         previous = self.parent
@@ -43,7 +43,7 @@ class Node(abc.ABC):
 
 
 class Folder(Node):
-    def __init__(self, name: str, children: Optional[dict[str, "Node"]] = None) -> None:
+    def __init__(self, name: str, children: dict[str, "Node"] | None = None) -> None:
         super().__init__(name)
         self.children = children or {}
 

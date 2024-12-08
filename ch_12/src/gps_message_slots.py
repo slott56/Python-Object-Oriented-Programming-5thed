@@ -4,18 +4,11 @@ Python 3 Object-Oriented Programming
 Chapter 12. Advanced Python Design Patterns
 """
 import abc
+from collections.abc import Sequence, Iterator
 import weakref
-from dataclasses import dataclass
-from math import radians, floor, fmod
-from typing import (
-    Optional,
-    cast,
-    Container,
-    overload,
-    Union,
-    Sequence,
-    Iterator,
-)
+from math import radians, floor
+from typing import cast, overload
+
 
 
 class Point:
@@ -76,14 +69,29 @@ Point(latitude=49.274166666666666, longitude=-123.18533333333333)
 0.8599964445097726
 >>> p.lon
 -2.1499896568333883
-
->>> p2 = Point(latitude=49.274, longitude=-123.185)
->>> p2.extra_attribute = 42
-Traceback (most recent call last):
-...
-AttributeError: 'Point' object has no attribute 'extra_attribute'
-
 """
+
+import sys
+
+if sys.version_info[:2] == (3, 13):
+    test_point_py313 = """
+    >>> p2 = Point(latitude=49.274, longitude=-123.185)
+    >>> p2.extra_attribute = 42
+    Traceback (most recent call last):
+    ...
+    AttributeError: 'Point' object has no attribute 'extra_attribute' and no __dict__ for setting new attributes
+    
+    """
+else:
+    test_point_py312 = """
+    >>> p2 = Point(latitude=49.274, longitude=-123.185)
+    >>> p2.extra_attribute = 42
+    Traceback (most recent call last):
+    ...
+    AttributeError: 'Point' object has no attribute 'extra_attribute'
+
+    """
+
 
 
 class Buffer(Sequence[int]):
@@ -104,7 +112,7 @@ class Buffer(Sequence[int]):
     def __getitem__(self, index: slice) -> bytes:
         ...
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[int, bytes]:
+    def __getitem__(self, index: int | slice) -> int | bytes:
         return self.content[index]
 
 
@@ -118,7 +126,7 @@ class Message:
     def __init__(self) -> None:
         self.buffer: weakref.ReferenceType[Buffer]
         self.offset: int
-        self.end: Optional[int]
+        self.end: int | None
         self.commas: list[int]
 
     def from_buffer(self, buffer: Buffer, offset: int) -> "Message":
@@ -214,7 +222,7 @@ RuntimeError: Broken reference
 >>> m.__dict__
 Traceback (most recent call last):
 ...
-AttributeError: 'GPGGA' object has no attribute '__dict__'
+AttributeError: 'GPGGA' object has no attribute '__dict__'. Did you mean: '__dir__'?
 
 
 """
@@ -284,7 +292,7 @@ Point(latitude=49.274166666666666, longitude=-123.18533333333333)
 """
 
 
-def message_factory(header: bytes) -> Optional[Message]:
+def message_factory(header: bytes) -> Message | None:
     # TODO: Add functools.lru_cache to save storage and time
     if header == b"GPGGA":
         return GPGGA()

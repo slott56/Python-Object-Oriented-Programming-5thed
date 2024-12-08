@@ -26,7 +26,7 @@ Composite::children *-- "*" Component : "Contains"
 
 @enduml
 
-@startuml coposite-objects.png
+@startuml composite-objects.png
 'figure 12: The Composite Pattern'
 skinparam monochrome true
 skinparam handwritten false

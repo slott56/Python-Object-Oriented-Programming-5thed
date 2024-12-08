@@ -2,6 +2,19 @@
 Python 3 Object-Oriented Programming
 
 Chapter 12. Advanced Python Design Patterns
+
+Default setup is this:
+
+1.  Download Java Runtime (JRE) for your platform.
+    https://www.java.com/en/download/manual.jsp
+
+2.  Download the latest ``plantuml-1.yyyy.m.jar``.
+    https://plantuml.com/download
+    It can be left in the project's top-level directory.
+    Or, it can be stuffed down into a virtual environment.
+
+3.  Update this script with the path to the JAR file.
+
 """
 import re
 from pathlib import Path
@@ -26,42 +39,46 @@ class FindUML:
                 yield (source.relative_to(self.base), target.relative_to(self.base))
 
 
+from pathlib import Path
 import subprocess
 
 
 class PlantUML:
-    """
-    Default setup is this:
-
-    1.  Download Java Runtime (JRE) for your platform.
-        https://www.java.com/en/download/manual.jsp
-
-    2.  Download the ``plantuml.jar`` and put into your conda environment ``share`` directory.
-        https://plantuml.com/download
-
-    3.  Use ``conda install graphiz`` to create the ``dot`` application in your conda environment.
-
-    4.  If necessary, update this script with environment name and locations
-    """
-
-    conda_env_name = "CaseStudy"
-    base_env = Path.home() / "miniconda3" / "envs" / conda_env_name
+    conda_base = Path.home() / "miniconda3" / "envs"
+    home_venv_base = Path.home() / "venv"
+    project_venv_base = Path.cwd() / ".venv"
 
     def __init__(
         self,
-        graphviz: Path = Path("bin") / "dot",
-        plantjar: Path = Path("share") / "plantuml.jar",
+        plantjar: str | Path = "plantuml-1.2024.7.jar",
+        venv_name: str = "CaseStudy"
     ) -> None:
-        self.graphviz = self.base_env / graphviz
-        self.plantjar = self.base_env / plantjar
+        def find_first(name: str | Path) -> Path:
+            places = [
+                self.conda_base / venv_name,
+                self.home_venv_base / venv_name,
+                self.project_venv_base / venv_name
+            ]
+            places += Path.cwd().parents
+            for place in places:
+                if (path := place / name).exists():
+                    return path
+            raise FileNotFoundError(f"could not find {plantjar}")
+
+        match plantjar:
+            case Path() as path if path.is_absolute():
+                self.plantjar = path
+            case Path() as path if not path.is_absolute():
+                self.plantjar = find_first(path)
+            case str() as name:
+                self.plantjar = find_first(name)
 
     def process(self, source: Path) -> None:
-        env = {
-            "GRAPHVIZ_DOT": str(self.graphviz),
+        env: dict[str, str] = {
+            # "GRAPHVIZ_DOT": str(path/to/graphviz/dot),
         }
         command = ["java", "-jar", str(self.plantjar), "-progress", str(source)]
         subprocess.run(command, env=env, check=True)
-        print()
 
 
 class GenerateImages:
@@ -80,6 +97,10 @@ class GenerateImages:
                     print(f"Skipping {source} -> {target}")
 
 
-if __name__ == "__main__":
+def main() -> None:
     g = GenerateImages(Path.cwd())
     g.make_all_images()
+
+
+if __name__ == "__main__":
+    main()

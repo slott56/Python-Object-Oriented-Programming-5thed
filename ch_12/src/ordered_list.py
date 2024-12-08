@@ -4,8 +4,6 @@ Python 3 Object-Oriented Programming
 Chapter 12. Advanced Python Design Patterns
 """
 import string
-import textwrap
-from typing import Union, List, Optional
 
 
 class ListStyleType:
@@ -93,11 +91,15 @@ class Text:
         line_iter = iter(self.content.splitlines())
         first = next(line_iter)
         first_body = [f"{prefix}{first}"]
-        item_body = first_body + [f"{' '*len(prefix)}{l}" for l in line_iter]
+        item_body = (
+                first_body +
+                [f"{' '*len(prefix)}{line}"
+                    for line in line_iter]
+        )
         return "\n".join(item_body) + "\n"
 
 
-Node = Union[OrderedList, ListItem, Text]
+type Node = OrderedList | ListItem | Text
 
 test_text = """
 >>> t = Text("nothing special")

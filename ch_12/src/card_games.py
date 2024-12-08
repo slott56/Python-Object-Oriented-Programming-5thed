@@ -4,19 +4,13 @@ Python 3 Object-Oriented Programming
 Chapter 12. Advanced Python Design Patterns
 """
 import abc
-import collections
+from collections import Counter
+from collections.abc import Iterator, Iterable
 import random
+from typing import cast, TypeVar
+
 from enum import Enum, auto
-from typing import (
-    Any,
-    Counter,
-    Iterator,
-    Iterable,
-    List,
-    NamedTuple,
-    TypeVar,
-    cast,
-)
+from typing import NamedTuple
 
 
 class Suit(str, Enum):
@@ -40,19 +34,20 @@ class Card(NamedTuple):
     suit: Suit
 
     def __str__(self) -> str:
-        return f"{self.rank}{self.suit}"
+        return f"{self.rank}{self.suit.value}"
 
 
 class Trick(int, Enum):
     pass
 
 
-class Hand(List[Card]):
+class Hand(list[Card]):
     def __init__(self, *cards: Card) -> None:
         super().__init__(cards)
 
+    @abc.abstractmethod
     def scoring(self) -> list[Trick]:
-        pass
+        ...
 
 
 class CardGameFactory(abc.ABC):
@@ -128,10 +123,10 @@ class CribbageHand(Hand):
             base = next(card_iter)
             for offset, card in enumerate(card_iter, start=1):
                 if base.rank + offset != card.rank:
-                    break
-            return offset + 1
+                    return offset
+            return len(sorted_cards)
 
-        hand_plus_starter = cast(List[CribbageCard], self + [self.starter])
+        hand_plus_starter = cast(list[CribbageCard], self + [self.starter])
         hand_plus_starter.sort()
         tricks = list(trick_iter(hand_plus_starter))
         if run_length(hand_plus_starter) == 5:
@@ -204,7 +199,7 @@ class PokerHand(Hand):
     def scoring(self) -> list[Trick]:
         """Return a single 'Trick'"""
         # Distinct Ranks
-        ranks: Counter[int] = collections.Counter(c.rank for c in self)
+        ranks: Counter[int] = Counter(c.rank for c in self)
         # Distinct Suits
         flush = len(set(c.suit for c in self)) == 1
         if len(ranks) == 1:

@@ -6,12 +6,13 @@ Chapter 12. Advanced Python Design Patterns
 import contextlib
 import csv
 from pathlib import Path
-import sqlite3
-from typing import ContextManager, TextIO, cast, Optional
+from typing import ContextManager, TextIO, cast
 import sys
 
+import sqlite3
 
-def test_setup(db_name: str = "sales.db") -> sqlite3.Connection:
+
+def db_preparation(db_name: str = "sales.db") -> sqlite3.Connection:
     conn = sqlite3.connect(db_name)
 
     conn.execute(
@@ -133,7 +134,7 @@ class SalesGrossQuery(QueryTemplate):
 
 
 def main() -> None:
-    test_setup()
+    db_preparation()
 
     task_1 = NewVehiclesQuery()
     task_1.process_format()

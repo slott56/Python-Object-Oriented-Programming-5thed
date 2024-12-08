@@ -1,43 +1,39 @@
 [project]
-name = "classifier"
-version = "2021.4.0"
-description = "Python 3 Object-Oriented Programming, 4th ed., Chapter 12"
+name = "ch_12"
+version = "2025.4.0"
+description = "Python 3 Object-Oriented Programming, 5th ed., Chapter 12"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {file = "LICENSE.txt"}
-keywords = ["k-NN", "object-oriented design"]
+requires-python = ">=3.12"
+keywords = ["Python", "object-oriented design"]
 authors = [
   {email = "slott56@gmail.com"},
   {name = "Steven F. Lott"}
 ]
 
 [tool.tox]
-legacy_tox_ini = """
-[tox]
-minversion = 3.4.0
-skipsdist = True
+requires = ["tox>=4.19"]
+env_list = ["3.13", "3.12", "type"]
 
-[testenv]
-deps =
-  -rrequirements.txt
-  black
-  pytest==6.2.4
-  tox==3.20.0
-  mypy==0.812
+[tool.tox.env_run_base]
+description = "Run test suite under {base_python}"
+deps = ["pytest", "ruff"]
+set_env = {PYTHONHASHSEED = "42"}
 
-setenv =
-  PYTHONPATH = {toxinidir}/src
-commands =
-  black src
-  # python -m doctest --option ELLIPSIS docs/examples.md
-  python -m doctest --option ELLIPSIS src/age_computation.py
-  python -m doctest --option ELLIPSIS src/images.py
-  python -m doctest --option ELLIPSIS src/gps_messages.py
-  python -m doctest --option ELLIPSIS src/gps_message_slots.py
-  python -m doctest --option ELLIPSIS src/card_games.py
-  python -m doctest --option ELLIPSIS src/ordered_list.py
-  python -m doctest --option ELLIPSIS src/file_system.py
-  python -m pytest
-  mypy --strict --show-error-codes src
+commands = [
+  ["pytest", "-v"],
+  ["pytest", "--doctest-modules", "-vv", "src"],
+  ["ruff", "check", "--ignore", "E402,F811"],
+]
 
-"""
+[tool.tox.env.type]
+description = "run type check on code base"
+deps = ["pyright", "mypy"]
+commands = [
+  ["pyright", "src"],
+  ["mypy", "src"],
+]
+
+[tool.mypy]
+show_error_codes = true
+strict = true
+python_version = "3.13"

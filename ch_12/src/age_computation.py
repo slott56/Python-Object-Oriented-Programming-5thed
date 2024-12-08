@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 12. Advanced Python Design Patterns
 """
-from typing import Optional
 
 
 class AgeCalculator:
@@ -86,7 +85,7 @@ test_timesince = """
 
 class IntervalAdapter:
     def __init__(self) -> None:
-        self.ts: Optional[TimeSince] = None
+        self.ts: TimeSince | None = None
 
     def time_offset(self, start: str, now: str) -> float:
         if self.ts is None:
