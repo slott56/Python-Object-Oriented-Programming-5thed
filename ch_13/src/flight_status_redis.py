@@ -5,9 +5,8 @@ Chapter 13.  Testing Object-Oriented Programs.
 """
 import datetime
 from enum import Enum
+from typing import cast
 import redis
-import sys
-from typing import Optional
 
 
 class Status(str, Enum):
@@ -30,9 +29,9 @@ class FlightStatusTracker:
 
     def get_status(
         self, flight: str
-    ) -> tuple[Optional[datetime.datetime], Optional[Status]]:
+    ) -> tuple[datetime.datetime | None, Status | None]:
         key = f"flightno:{flight}"
-        value = self.redis.get(key)
+        value = cast(str, self.redis.get(key))
         if value:
             text_timestamp, text_status = value.split("|")
             timestamp = datetime.datetime.fromisoformat(text_timestamp)
@@ -42,7 +41,7 @@ class FlightStatusTracker:
 
 
 class FlightStatusTracker_Alt:
-    def __init__(self, redis_instance: Optional[redis.Connection] = None) -> None:
+    def __init__(self, redis_instance: redis.Connection | None = None) -> None:
         self.redis = (
             redis_instance
             if redis_instance

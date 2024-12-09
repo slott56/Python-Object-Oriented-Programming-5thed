@@ -6,6 +6,10 @@ Chapter 13.  Testing Object-Oriented Programs.
 import pytest
 
 
+def test_int_float() -> None:
+    assert 1 == 1.0
+
+
 class TestNumbers:
     def test_int_float(self) -> None:
         assert 1 == 1.0

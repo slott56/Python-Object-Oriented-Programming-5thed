@@ -3,8 +3,8 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-from __future__ import annotations
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 def setup_module(module: Any) -> None:

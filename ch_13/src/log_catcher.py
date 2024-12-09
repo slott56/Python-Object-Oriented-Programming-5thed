@@ -5,11 +5,11 @@ Chapter 13.  Testing Object-Oriented Programs.
 """
 import json
 from pathlib import Path
-import socketserver
-from typing import TextIO
 import pickle
+import socketserver
 import struct
 import sys
+from typing import TextIO
 
 
 class LogDataCatcher(socketserver.BaseRequestHandler):

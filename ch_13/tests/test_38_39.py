@@ -3,8 +3,8 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-import pytest
 import sys
+import pytest
 
 
 @pytest.mark.skipif(

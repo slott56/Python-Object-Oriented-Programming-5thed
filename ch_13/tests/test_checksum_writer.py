@@ -3,12 +3,11 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-from __future__ import annotations
-import checksum_writer
-import pytest
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 import sys
+import pytest
+import checksum_writer
 
 
 @pytest.fixture
@@ -45,7 +44,7 @@ from typing import Any
 
 @pytest.fixture
 def mock_hashlib(monkeypatch: Any) -> Mock:
-    mocked_hashlib = Mock(sha256=Mock(return_value=sentinel.checksum))
+    mocked_hashlib = Mock(sha256=Mock(return_value=sentinel.CHECKSUM))
     monkeypatch.setattr(checksum_writer, "hashlib", mocked_hashlib)
     return mocked_hashlib
 
@@ -55,4 +54,4 @@ def test_file_checksum(mock_hashlib: Mock, tmp_path: Any) -> None:
     source_file.write_text("")
     cw = checksum_writer.FileChecksum(source_file)
     assert cw.source == source_file
-    assert cw.checksum == sentinel.checksum
+    assert cw.checksum == sentinel.CHECKSUM

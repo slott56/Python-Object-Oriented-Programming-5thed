@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-import tarfile
 from pathlib import Path
 import hashlib
 

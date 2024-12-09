@@ -5,7 +5,6 @@ Chapter 13.  Testing Object-Oriented Programs.
 """
 import logging
 import logging.handlers
-import time
 import sys
 from math import factorial
 

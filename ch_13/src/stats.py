@@ -3,11 +3,10 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-import collections
-from typing import DefaultDict, List, Optional
+from collections import defaultdict
 
 
-class StatsList(List[Optional[float]]):
+class StatsList(list[float | None]):
     """Stats with None objects rejected"""
 
     def mean(self) -> float:
@@ -23,7 +22,7 @@ class StatsList(List[Optional[float]]):
             return (clean[idx] + clean[idx - 1]) / 2
 
     def mode(self) -> list[float]:
-        freqs: DefaultDict[float, int] = collections.defaultdict(int)
+        freqs: defaultdict[float, int] = defaultdict(int)
         for item in filter(None, self):
             freqs[item] += 1
         mode_freq = max(freqs.values())

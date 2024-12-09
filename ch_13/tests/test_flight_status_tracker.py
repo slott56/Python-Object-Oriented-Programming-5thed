@@ -4,9 +4,10 @@ Python 3 Object-Oriented Programming
 Chapter 13.  Testing Object-Oriented Programs.
 """
 import datetime
-import flight_status_redis
 from unittest.mock import Mock, patch, call
 import pytest
+
+import flight_status_redis
 
 
 @pytest.fixture
@@ -17,7 +18,8 @@ def mock_redis() -> Mock:
 
 @pytest.fixture
 def tracker(
-    monkeypatch: pytest.MonkeyPatch, mock_redis: Mock
+        monkeypatch: pytest.MonkeyPatch,
+        mock_redis: Mock
 ) -> flight_status_redis.FlightStatusTracker:
     """Depending on the test scenario, this may require a running REDIS server."""
     fst = flight_status_redis.FlightStatusTracker()
@@ -26,7 +28,8 @@ def tracker(
 
 
 def test_monkeypatch_class(
-    tracker: flight_status_redis.FlightStatusTracker, mock_redis: Mock
+        tracker: flight_status_redis.FlightStatusTracker,
+        mock_redis: Mock
 ) -> None:
     # with patch.object(tracker, "redis", mock_redis):
     with pytest.raises(ValueError) as ex:
@@ -36,7 +39,8 @@ def test_monkeypatch_class(
 
 
 def test_patch_class(
-    tracker: flight_status_redis.FlightStatusTracker, mock_redis: Mock
+        tracker: flight_status_redis.FlightStatusTracker,
+        mock_redis: Mock
 ) -> None:
     fake_now = datetime.datetime(2020, 10, 26, 23, 24, 25)
     utc = datetime.timezone.utc
@@ -46,7 +50,7 @@ def test_patch_class(
         mock_datetime.timezone = Mock(utc=utc)
         tracker.change_status("AC101", flight_status_redis.Status.ON_TIME)
     mock_datetime.datetime.now.assert_called_once_with(tz=utc)
-    expected = f"2020-10-26T23:24:25|ON TIME"
+    expected = "2020-10-26T23:24:25|ON TIME"
     mock_redis.set.assert_called_once_with("flightno:AC101", expected)
     # Also
     assert mock_datetime.datetime.now.mock_calls == [call(tz=utc)]
@@ -54,14 +58,15 @@ def test_patch_class(
 
 
 def test_patch_class_2(
-    tracker: flight_status_redis.FlightStatusTracker, mock_redis: Mock
+        tracker: flight_status_redis.FlightStatusTracker,
+        mock_redis: Mock
 ) -> None:
     """More focused patch"""
     mock_datetime_now = Mock(return_value=datetime.datetime(2020, 10, 26, 23, 24, 25))
     with patch("flight_status_redis.datetime.datetime", now=mock_datetime_now):
         tracker.change_status("AC101", flight_status_redis.Status.ON_TIME)
     mock_datetime_now.assert_called_once_with(tz=datetime.timezone.utc)
-    expected = f"2020-10-26T23:24:25|ON TIME"
+    expected = "2020-10-26T23:24:25|ON TIME"
     mock_redis.set.assert_called_once_with("flightno:AC101", expected)
     # Also
     assert mock_datetime_now.mock_calls == [call(tz=datetime.timezone.utc)]

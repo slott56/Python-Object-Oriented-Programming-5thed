@@ -12,7 +12,6 @@ class CheckNumbers(unittest.TestCase):
 
     @unittest.expectedFailure
     def test_str_float(self) -> None:
-        """Remove the @unittest.expectedFailure decorator to see a failing test."""
         self.assertEqual(1, "1")
 
 

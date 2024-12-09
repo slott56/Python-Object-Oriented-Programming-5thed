@@ -3,16 +3,17 @@ Python 3 Object-Oriented Programming
 
 Chapter 13.  Testing Object-Oriented Programs.
 """
-from __future__ import annotations
+from collections.abc import Iterator
 import logging
 from pathlib import Path
-import pytest
-import subprocess
 import signal
+import subprocess
 import sys
 import time
+
+import pytest
+
 import remote_logging_app
-from typing import Iterator, Any
 
 # This is an integration test, and works by starting a log_catcher
 # We can call it the "Catcher in the Sky".
@@ -51,9 +52,9 @@ def logging_config() -> Iterator[None]:
 
 def test_1(log_catcher: None, logging_config: None) -> None:
     for i in range(10):
-        r = remote_logging_app.work(i)
+        remote_logging_app.work(i)
 
 
 def test_2(log_catcher: None, logging_config: None) -> None:
     for i in range(1, 10):
-        r = remote_logging_app.work(52 * i)
+        remote_logging_app.work(52 * i)
