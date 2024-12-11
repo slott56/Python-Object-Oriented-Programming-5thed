@@ -5,12 +5,12 @@ Chapter 14.  Concurrency
 """
 import asyncio
 import pickle
-from pytest import *
 import struct
 from unittest.mock import AsyncMock, Mock, call
+import pytest
 import log_catcher
 
-@fixture
+@pytest.fixture
 def mock_target(monkeypatch):
     open_file = Mock()
     log_catcher.TARGET = open_file
@@ -25,13 +25,13 @@ def test_log_writer(mock_target, capsys):
     ]
 
 
-@fixture
+@pytest.fixture
 def mock_log_writer(monkeypatch):
     log_writer = AsyncMock()
     monkeypatch.setattr(log_catcher, 'log_writer', log_writer)
     return log_writer
 
-@fixture
+@pytest.fixture
 def mock_stream():
     mock_socket = Mock(
         getpeername=Mock(return_value=['127.0.0.1', 12342])

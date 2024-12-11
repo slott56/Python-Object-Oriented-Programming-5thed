@@ -4,11 +4,10 @@ Python 3 Object-Oriented Programming
 Chapter 14.  Concurrency
 """
 import asyncio
-import httpx
 import re
 import time
-from urllib.request import urlopen
-from typing import Optional, NamedTuple
+from typing import NamedTuple
+import httpx
 
 
 class Zone(NamedTuple):
@@ -81,7 +80,12 @@ async def task_main() -> None:
     start = time.perf_counter()
     forecasts = [MarineWX(z) for z in ZONES]
 
-    await asyncio.gather(*(asyncio.create_task(f.run()) for f in forecasts))
+    await asyncio.gather(
+        *(
+            asyncio.create_task(f.run())
+            for f in forecasts
+        )
+    )
 
     for f in forecasts:
         print(f)

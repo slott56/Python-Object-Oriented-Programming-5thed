@@ -3,25 +3,28 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from __future__ import annotations
+from collections.abc import Iterator
 from pathlib import Path
-from typing import List, Iterator, Optional, Union, TYPE_CHECKING
+from multiprocessing import Queue
 
-if TYPE_CHECKING:
-    Query_Q = Queue[Union[str, None]]
-    Result_Q = Queue[List[str]]
+
+type Query_Q = Queue[str | None]
+type Result_Q = Queue[list[str]]
 
 
 def search(paths: list[Path], query_q: Query_Q, results_q: Result_Q) -> None:
     print(f"PID: {os.getpid()}, paths {len(paths)}")
     lines: list[str] = []
     for path in paths:
-        lines.extend(l.rstrip() for l in path.read_text().splitlines())
+        lines.extend(
+            line.rstrip()
+            for line in path.read_text().splitlines()
+        )
 
     while True:
         if (query_text := query_q.get()) is None:
             break
-        results = [l for l in lines if query_text in l]
+        results = [line for line in lines if query_text in line]
         results_q.put(results)
 
 
@@ -35,7 +38,7 @@ class DirectorySearch:
         self.results_queue: Result_Q
         self.search_workers: list[Process]
 
-    def setup_search(self, paths: list[Path], cpus: Optional[int] = None) -> None:
+    def setup_search(self, paths: list[Path], cpus: int | None = None) -> None:
         if cpus is None:
             cpus = cpu_count()
         worker_paths = [paths[i::cpus] for i in range(cpus)]
@@ -58,7 +61,7 @@ class DirectorySearch:
             proc.join()
 
     def search(self, target: str) -> Iterator[str]:
-        print(f"search queues={self.query_queues}")
+        # print(f"search queues={self.query_queues}")
         for q in self.query_queues:
             q.put(target)
 
@@ -69,7 +72,7 @@ class DirectorySearch:
 
 def all_source(path: Path, pattern: str) -> Iterator[Path]:
     for root, dirs, files in os.walk(path):
-        for skip in {".tox", ".mypy_cache", "__pycache__", ".idea"}:
+        for skip in {".tox", ".mypy_cache", "__pycache__", ".idea", ".venv"}:
             if skip in dirs:
                 dirs.remove(skip)
         yield from (Path(root) / f for f in files if fnmatch(f, pattern))

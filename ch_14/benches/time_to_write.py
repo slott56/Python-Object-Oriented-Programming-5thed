@@ -9,7 +9,7 @@ import timeit
 from textwrap import dedent
 import random
 import string
-from pathlib import Path
+
 
 repeat_count = 5_000_000
 for message_size in (128, 256, 512, 1024):

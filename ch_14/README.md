@@ -1,9 +1,9 @@
-# Python 3 Object-Oriented Programming, 4th ed.
+# Python 3 Object-Oriented Programming, 5th ed.
 
-Chapter 14.  Concurrency
+Chapter 14, Concurrency.
 
+To run the test suite using **uv**:
 
-1.   	Threads
-2.   	Multiprocessing
-3.   	Futures
-4.   	AsyncIO
+```bash
+uvx tox run
+```

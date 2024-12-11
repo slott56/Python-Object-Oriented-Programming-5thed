@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from __future__ import annotations
 import argparse
 import signal
 import subprocess
@@ -22,7 +21,7 @@ def main(clients: int = 10) -> None:
     # Give the server 100 ms to get started.
     time.sleep(0.100)
     # Make sure it didn't crash because of an earlier test
-    assert server.poll() is None, f"Server didn't start."
+    assert server.poll() is None, "Server didn't start."
     workers = [
         subprocess.Popen(["python", "src/remote_logging_app.py"])
         for i in range(clients)

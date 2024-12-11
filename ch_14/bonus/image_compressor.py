@@ -3,11 +3,11 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
+from collections.abc import Iterator
 from concurrent import futures
 from PIL import Image  # type: ignore [import]
 from pathlib import Path
 import time
-from typing import Iterator, List, Iterable, Tuple, Optional, Type
 
 
 # State design with flyweight objects.
@@ -141,7 +141,7 @@ def rle_row_compress(row_bytes: bytes) -> bytes:
     return b"".join(run.emit() for run in rle_compress(row_bytes))
 
 
-def image_to_rle(image: Image, workers: Optional[futures.Executor] = None) -> bytes:
+def image_to_rle(image: Image, workers: futures.Executor | None = None) -> bytes:
     if workers is None:
         workers = futures.ProcessPoolExecutor()
     b_w = image.convert("L")
@@ -156,8 +156,8 @@ def image_to_rle(image: Image, workers: Optional[futures.Executor] = None) -> by
 
 def compress(
     image_path: Path,
-    executor_type: Optional[Type[futures.Executor]] = None,
-) -> Tuple[str, float]:
+    executor_type: type[futures.Executor] | None = None,
+) -> tuple[str, float]:
     if executor_type is None:
         executor_type = futures.ProcessPoolExecutor
     start = time.perf_counter()
@@ -212,7 +212,6 @@ def ascii_art(image: Image) -> None:
     else:
         scaled_b_w = b_w
 
-    bytes = list(scaled_b_w.getdata())
     for r in range(scaled_b_w.height):
         gray_char = lambda b: int(len(grayscale) * (b / 256))
         gray = map(

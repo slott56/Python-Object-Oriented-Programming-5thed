@@ -3,8 +3,8 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from __future__ import annotations
 import abc
+from collections.abc import Iterable
 from itertools import permutations
 import logging
 import logging.handlers
@@ -12,7 +12,7 @@ import os
 import random
 import time
 import sys
-from typing import Iterable
+
 
 logger = logging.getLogger(f"app_{os.getpid()}")
 
@@ -75,7 +75,7 @@ def main(workload: int = 10, sorter: Sorter = BogoSort()) -> int:
     for i in range(workload):
         samples = random.randint(3, 10)
         data = [random.random() for _ in range(samples)]
-        ordered = sorter.sort(data)
+        sorter.sort(data)
         total += samples
     return total
 
@@ -87,9 +87,11 @@ if __name__ == "__main__":
     logging.basicConfig(handlers=[socket_handler, stream_handler], level=logging.INFO)
 
     start = time.perf_counter()
+
     workload = 10
     logger.info("sorting %d collections", workload)
     samples = main(workload, GnomeSort())
+
     end = time.perf_counter()
     logger.info("produced %d entries, taking %f s", workload * 2 + 2, end - start)
 

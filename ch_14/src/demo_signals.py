@@ -6,7 +6,7 @@ Chapter 14.  Concurrency
 from time import sleep
 from subprocess import Popen
 from os import kill
-from signal import SIGTERM, SIGINT
+from signal import SIGINT
 from sys import argv
 
 
@@ -27,7 +27,7 @@ def parent() -> None:
     print(f"Child: {child_process.poll()}")
     print(f"Child: {child_process.pid}")
     sleep(2)
-    print(f"Signaling Child...")
+    print("Signaling Child...")
     kill(child_process.pid, SIGINT)
 
 

@@ -7,11 +7,11 @@ import asyncio
 import asyncio.exceptions
 import json
 from pathlib import Path
-from typing import TextIO, Any
 import pickle
 import signal
 import struct
 import sys
+from typing import TextIO
 
 
 TARGET: TextIO
@@ -25,23 +25,10 @@ def serialize(bytes_payload: bytes) -> str:
     TARGET.write("\n")
     return text_message
 
-
-if sys.version_info >= (3, 9):
-
-    async def log_writer(bytes_payload: bytes) -> None:
-        global LINE_COUNT
-        LINE_COUNT += 1
-        result = await asyncio.to_thread(serialize, bytes_payload)
-
-
-else:
-
-    async def log_writer(bytes_payload: bytes) -> None:
-        """Python 3.8 version"""
-        global LINE_COUNT
-        LINE_COUNT += 1
-        loop = asyncio.get_running_loop()
-        result = await loop.run_in_executor(None, serialize, bytes_payload)
+async def log_writer(bytes_payload: bytes) -> None:
+    global LINE_COUNT
+    LINE_COUNT += 1
+    await asyncio.to_thread(serialize, bytes_payload)
 
 
 SIZE_FORMAT = ">L"
@@ -107,14 +94,7 @@ if __name__ == "__main__":
 
     with Path("one.log").open("w") as TARGET:
         try:
-            if sys.platform == "win32":
-                # https://github.com/encode/httpx/issues/914
-                loop = asyncio.get_event_loop()
-                loop.run_until_complete(main(HOST, PORT))
-                loop.run_until_complete(asyncio.sleep(1))
-                loop.close()
-            else:
-                asyncio.run(main(HOST, PORT))
+            asyncio.run(main(HOST, PORT))
 
         except (asyncio.exceptions.CancelledError, KeyboardInterrupt):
             ending = {"lines_collected": LINE_COUNT}

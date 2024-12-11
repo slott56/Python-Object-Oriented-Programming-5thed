@@ -110,7 +110,7 @@ def very_large() -> Image.Image:
         ImageColor.getcolor(f"#{g:02x}{g:02x}{g:02x}", "L")
         for g in range(0, 256, 16)
     ] + [
-        ImageColor.getcolor(f"#ffffff", "L")
+        ImageColor.getcolor("#ffffff", "L")
     ]
     img = Image.new("L", (7200, 5400))
     draw = ImageDraw.Draw(img)
@@ -130,7 +130,7 @@ async def make(image: BuildImage) -> None:
         await image.make()
 
 async def main():
-    base = Path.cwd()/"images"
+    base = Path.cwd() / "images"
 
     image_list = [
         GetXKCD(

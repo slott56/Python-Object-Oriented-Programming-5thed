@@ -3,16 +3,18 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from __future__ import annotations
 import argparse
-import ast
+from collections.abc import Iterator
 from concurrent import futures
 from fnmatch import fnmatch
 import os
-from pathlib import Path
 import sys
 import time
-from typing import Iterator, NamedTuple
+
+
+import ast
+from pathlib import Path
+from typing import NamedTuple
 
 
 class ImportResult(NamedTuple):

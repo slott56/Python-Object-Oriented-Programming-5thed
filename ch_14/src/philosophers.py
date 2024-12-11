@@ -3,13 +3,10 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from __future__ import annotations
 import asyncio
-import collections
 import random
-from typing import List, DefaultDict, Iterator
 
-FORKS: List[asyncio.Lock]
+FORKS: list[asyncio.Lock]
 
 
 async def philosopher(id: int, footman: asyncio.Semaphore) -> tuple[int, float, float]:

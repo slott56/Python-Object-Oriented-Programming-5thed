@@ -3,23 +3,23 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from pytest import *
-from unittest.mock import Mock, sentinel, call
+from unittest.mock import Mock, call
+import pytest
 import directory_search
 
-@fixture
+@pytest.fixture
 def mock_query_queue():
     return Mock(
         get=Mock(side_effect=["xyzzy", None])
     )
 
-@fixture
+@pytest.fixture
 def mock_result_queue():
     return Mock(
         put=Mock()
     )
 
-@fixture
+@pytest.fixture
 def mock_paths(tmp_path):
     f1 = tmp_path / "file1"
     f1.write_text("not in file1\n")
@@ -36,7 +36,7 @@ def test_search(mock_paths, mock_query_queue, mock_result_queue):
     ]
 
 
-@fixture
+@pytest.fixture
 def mock_directory(tmp_path):
     f1 = tmp_path / "file1.py"
     f1.write_text("# file1.py\n")
@@ -53,7 +53,7 @@ def test_all_source(mock_directory):
     ]
 
 
-@fixture
+@pytest.fixture
 def mock_queue(monkeypatch):
     mock_instance = Mock(
         name="mock Queue",
@@ -67,7 +67,7 @@ def mock_queue(monkeypatch):
     return mock_queue_class
 
 
-@fixture
+@pytest.fixture
 def mock_process(monkeypatch):
     mock_instance = Mock(
         name="mock Process",

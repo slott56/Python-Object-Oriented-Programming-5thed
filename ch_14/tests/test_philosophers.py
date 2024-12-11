@@ -4,11 +4,11 @@ Python 3 Object-Oriented Programming
 Chapter 14.  Concurrency
 """
 import asyncio
-from pytest import *
 from unittest.mock import AsyncMock, Mock, call, sentinel
+import pytest
 import philosophers
 
-@fixture
+@pytest.fixture
 def mock_random(monkeypatch):
     random = Mock(
         random=Mock(side_effect=[0.2, 0.3])
@@ -16,7 +16,7 @@ def mock_random(monkeypatch):
     monkeypatch.setattr(philosophers, 'random', random)
     return random
 
-@fixture
+@pytest.fixture
 def mock_sleep(monkeypatch):
     sleep = AsyncMock()
     monkeypatch.setattr(asyncio, 'sleep', sleep)
@@ -42,13 +42,13 @@ def test_philosopher(mock_sleep, mock_random, capsys):
         "0 philosophizing"
     ]
 
-@fixture
+@pytest.fixture
 def mock_philosopher(monkeypatch):
     philosopher = AsyncMock()
     monkeypatch.setattr(philosophers, 'philosopher', philosopher)
     return philosopher
 
-@fixture
+@pytest.fixture
 def mock_bounded_semaphore(monkeypatch):
     mock_class = Mock(
         return_value=sentinel.mock_bounded_semaphore

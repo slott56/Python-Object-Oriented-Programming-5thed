@@ -4,13 +4,14 @@ Python 3 Object-Oriented Programming
 Chapter 14.  Concurrency
 """
 from pathlib import Path
-from PIL import Image
-from pytest import *
-from unittest.mock import AsyncMock, Mock, call
-import image_compressor
 import random
+from PIL import Image
+import pytest
 
-@fixture(params=[16, 32, 64, 128, 256, 384, 512])
+import image_compressor
+
+
+@pytest.fixture(params=[16, 32, 64, 128, 256, 384, 512])
 def pattern(request):
     def diamond(width, height, h):
         if h < height//2:

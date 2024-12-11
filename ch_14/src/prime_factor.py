@@ -3,7 +3,6 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from __future__ import annotations
 from math import sqrt, ceil
 import random
 from multiprocessing.pool import Pool

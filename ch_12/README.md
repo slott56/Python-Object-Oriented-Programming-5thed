@@ -1,4 +1,4 @@
-# Python 3 Object-Oriented Programming, 4th ed.
+# Python 3 Object-Oriented Programming, 5th ed.
 
 Chapter 12, Advanced Python design patterns.
 

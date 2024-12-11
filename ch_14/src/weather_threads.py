@@ -50,6 +50,7 @@ class TempGetter(Thread):
 
     def run(self) -> None:
         with urlopen(self.station.url) as stream:
+            doc: bytes = b''
             try:
                 # xml = ElementTree.parse(stream)
                 doc = stream.read()

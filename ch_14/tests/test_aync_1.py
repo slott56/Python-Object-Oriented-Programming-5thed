@@ -3,13 +3,12 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from pytest import *
 from unittest.mock import AsyncMock, Mock, call
-import async_1
 import asyncio
+import pytest
+import async_1
 
-
-@fixture
+@pytest.fixture
 def mock_random(monkeypatch):
     random = Mock(
         random=Mock(return_value=0.5)
@@ -17,7 +16,7 @@ def mock_random(monkeypatch):
     monkeypatch.setattr(async_1, 'random', random)
     return random
 
-@fixture
+@pytest.fixture
 def mock_sleep(monkeypatch):
     sleep = AsyncMock()
     monkeypatch.setattr(asyncio, 'sleep', sleep)
@@ -34,7 +33,7 @@ def test_random_sleep(mock_random, mock_sleep, capsys):
         '42 awakens, refreshed'
     ]
 
-@fixture
+@pytest.fixture
 def mock_random_sleep(monkeypatch):
     random_sleep = AsyncMock()
     monkeypatch.setattr(async_1, 'random_sleep', random_sleep)

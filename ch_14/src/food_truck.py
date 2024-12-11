@@ -5,7 +5,7 @@ Chapter 14. Concurrency
 """
 import math
 import random
-from threading import Thread, Lock
+from threading import Thread
 import time
 
 THE_ORDERS = [

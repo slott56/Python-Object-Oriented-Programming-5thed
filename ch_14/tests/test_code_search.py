@@ -3,9 +3,8 @@ Python 3 Object-Oriented Programming
 
 Chapter 14.  Concurrency
 """
-from pathlib import Path
-from pytest import *
-from unittest.mock import MagicMock, Mock, sentinel, call
+from unittest.mock import MagicMock, Mock, call
+import pytest
 import code_search
 
 
@@ -15,7 +14,7 @@ def test_import_result(tmp_path):
     i2 = code_search.ImportResult(tmp_path, {"math", "typing"})
     assert i2.focus
 
-@fixture
+@pytest.fixture
 def mock_directory(tmp_path):
     f1 = tmp_path / "file1.py"
     f1.write_text("# file1.py\n")
@@ -31,13 +30,13 @@ def test_all_source(mock_directory):
         mock_directory / "file1.py"
     ]
 
-@fixture
+@pytest.fixture
 def mock_code_1(tmp_path):
     source = tmp_path / "code_1.py"
     source.write_text("import math\nprint(math.pi)\n")
     return source
 
-@fixture
+@pytest.fixture
 def mock_code_2(tmp_path):
     source = tmp_path / "code_2.py"
     source.write_text("import math\nfrom typing import Callable\nprint(math.pi)\n")
@@ -51,7 +50,7 @@ def test_typing(mock_code_2):
     actual = code_search.find_imports(mock_code_2)
     assert actual == code_search.ImportResult(mock_code_2, {"math", "typing"})
 
-@fixture
+@pytest.fixture
 def mock_futures_pool(tmp_path, monkeypatch):
     future = Mock(
         result=Mock(
@@ -73,14 +72,14 @@ def mock_futures_pool(tmp_path, monkeypatch):
     monkeypatch.setattr(code_search.futures, 'as_completed', as_completed)
     return pool_class
 
-@fixture
+@pytest.fixture
 def mock_all_source(tmp_path, monkeypatch):
     paths = [tmp_path / "file1.py"]
     function = Mock(return_value=paths)
     monkeypatch.setattr(code_search, 'all_source', function)
     return paths
 
-@fixture
+@pytest.fixture
 def mock_time(monkeypatch):
     time = Mock(
         perf_counter=Mock(side_effect=[0.0, 0.42])
